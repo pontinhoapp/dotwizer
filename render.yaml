@@ -14,7 +14,7 @@ services:
     region: virginia
     branch: main
     autoDeployTrigger: checksPass
-    buildCommand: npm ci && npm run build --workspace @pontinho/api && npm run prisma:migrate:deploy --workspace @pontinho/api
+    buildCommand: npm ci --include=dev && npm run build --workspace @pontinho/api && npm run prisma:migrate:deploy --workspace @pontinho/api
     startCommand: node apps/api/build/server.js
     envVars:
       - fromGroup: pontinho-shared
@@ -40,7 +40,7 @@ services:
     region: virginia
     branch: main
     autoDeployTrigger: checksPass
-    buildCommand: npm ci && npm run build --workspace @pontinho/game
+    buildCommand: npm ci --include=dev && npm run build --workspace @pontinho/game
     startCommand: node apps/game/build/index.js
     envVars:
       - fromGroup: pontinho-shared
