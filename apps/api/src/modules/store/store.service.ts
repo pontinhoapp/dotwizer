@@ -33,11 +33,6 @@ interface BuyInput extends QuoteInput {
   idempotencyKey: string;
 }
 
-interface ReplayInput {
-  purchase: PurchaseRecord;
-  quantity: number;
-}
-
 interface ConfirmPurchaseInput {
   providerTransactionId: string;
 }
@@ -102,11 +97,13 @@ export class StoreService {
   async buy({ userId, quantity, idempotencyKey }: BuyInput): Promise<PurchaseResponse> {
     const { amountCents } = this.quote({ quantity });
     const provider = this.paymentProvider.name;
-    const created = await this.purchasesRepository.createOnce({ userId, quantity, amountCents, provider, idempotencyKey });
-    if (!created.created) {
-      return this.replay({ purchase: created.purchase, quantity });
+    const purchase = await this.purchasesRepository.createOnce({ userId, quantity, amountCents, provider, idempotencyKey });
+    if (purchase.quantity !== quantity) {
+      throw new ApiError({ code: "idempotencyKeyReused" });
     }
-    const { purchase } = created;
+    if (purchase.status === "PAID") {
+      return toResponse({ purchase });
+    }
     const charge = await this.paymentProvider.charge({ purchaseId: purchase.id, userId, quantity, amountCents });
     const { providerTransactionId, status } = charge;
     await this.purchasesRepository.attachProviderTransaction({ purchaseId: purchase.id, providerTransactionId });
@@ -130,13 +127,6 @@ export class StoreService {
       }
       return toResponse({ purchase: await this.creditPurchase({ transaction, purchase }) });
     });
-  }
-
-  private replay({ purchase, quantity }: ReplayInput): PurchaseResponse {
-    if (purchase.quantity !== quantity) {
-      throw new ApiError({ code: "idempotencyKeyReused" });
-    }
-    return toResponse({ purchase });
   }
 
   private async creditPurchase({ transaction, purchase }: CreditPurchaseInput): Promise<PurchaseRecord> {

@@ -23,11 +23,6 @@ interface CreateOnceInput {
   idempotencyKey: string;
 }
 
-export interface CreateOnceResult {
-  purchase: PurchaseRecord;
-  created: boolean;
-}
-
 interface AttachProviderTransactionInput {
   purchaseId: string;
   providerTransactionId: string;
@@ -50,13 +45,12 @@ export class PurchasesRepository {
     this.client = client;
   }
 
-  async createOnce(input: CreateOnceInput): Promise<CreateOnceResult> {
-    const { count } = await this.client.purchase.createMany({ data: [input], skipDuplicates: true });
-    const purchase = await this.client.purchase.findUniqueOrThrow({
+  async createOnce(input: CreateOnceInput): Promise<PurchaseRecord> {
+    await this.client.purchase.createMany({ data: [input], skipDuplicates: true });
+    return this.client.purchase.findUniqueOrThrow({
       where: { userId_idempotencyKey: { userId: input.userId, idempotencyKey: input.idempotencyKey } },
       select: purchaseSelect,
     });
-    return { purchase, created: count === 1 };
   }
 
   async attachProviderTransaction({ purchaseId, providerTransactionId }: AttachProviderTransactionInput): Promise<void> {

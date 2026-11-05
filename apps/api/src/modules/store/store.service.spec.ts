@@ -31,7 +31,7 @@ function buildService({
     createOnce: async (input) => {
       createCalls.push(input);
       if (replayOf) {
-        return { purchase: replayOf, created: false };
+        return replayOf;
       }
       const purchase: PurchaseRecord = {
         id: "p-1",
@@ -44,7 +44,7 @@ function buildService({
         paidAt: null,
       };
       stored.push(purchase);
-      return { purchase, created: true };
+      return purchase;
     },
     attachProviderTransaction: async (input) => {
       attachCalls.push(input);
@@ -186,6 +186,27 @@ describe("StoreService", () => {
       assert.deepStrictEqual(charges, []);
       assert.deepStrictEqual(entries, []);
       assert.deepStrictEqual(attachCalls, []);
+    });
+
+    it("charges and credits a repeated request whose purchase was left pending", async () => {
+      const pending: PurchaseRecord = {
+        id: "p-1",
+        userId,
+        quantity: 2_000,
+        amountCents: 200_000,
+        status: "PENDING",
+        providerTransactionId: null,
+        createdAt: paidAt,
+        paidAt: null,
+      };
+      const { service, charges, entries, attachCalls } = buildService({ replayOf: pending, existing: pending });
+
+      const purchase = await service.buy({ userId, quantity: 2_000, idempotencyKey });
+
+      assert.deepStrictEqual(charges, [{ purchaseId: "p-1", userId, quantity: 2_000, amountCents: 200_000 }]);
+      assert.deepStrictEqual(attachCalls, [{ purchaseId: "p-1", providerTransactionId: "tx-1" }]);
+      assert.strictEqual(entries.length, 1);
+      assert.strictEqual(purchase.status, "PAID");
     });
 
     it("refuses to reuse the key of a purchase for another quantity", async () => {
