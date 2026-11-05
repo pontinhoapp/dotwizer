@@ -27,7 +27,7 @@ services:
       - key: SUPABASE_URL
         value: https://afxxnbapxslagtqpuiis.supabase.co
       - key: CORS_ORIGINS
-        value: https://pontinho.vercel.app
+        value: https://dotwizer-mobile.vercel.app
       - key: TRUST_PROXY
         value: "true"
       - key: PAYMENT_PROVIDER

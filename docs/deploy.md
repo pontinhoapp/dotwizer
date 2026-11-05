@@ -36,7 +36,7 @@ A API sobe com `NODE_ENV=staging`: aceita o provedor de pagamento de teste, não
 1. Na Vercel, **Add New → Project** e importe o repositório.
 2. Em **Root Directory**, escolha `apps/mobile`. Deixe ligada a opção de incluir os arquivos fora dessa pasta, que já vem ligada ([monorepos](https://vercel.com/docs/monorepos/monorepo-faq)): o app usa os pacotes de `packages/`.
 3. O `vercel.json` já define o build e a saída. Em **Environment Variables**, cole só a `EXPO_PUBLIC_SUPABASE_ANON_KEY` com a chave anon. As outras três estão em `apps/mobile/.env.production`, que o `expo export` lê ([variáveis do Expo](https://docs.expo.dev/guides/environment-variables/)).
-4. Faça o deploy e anote o domínio. Se não for `pontinho.vercel.app`, troque `CORS_ORIGINS` no `render.yaml` e faça o push.
+4. Faça o deploy e anote o domínio. Se não for `dotwizer-mobile.vercel.app`, troque `CORS_ORIGINS` no `render.yaml` e faça o push.
 
 O app sai como página única (`web.output: "single"`), e o `vercel.json` manda toda rota para o `index.html`, como na [doc do Expo](https://docs.expo.dev/guides/publishing-websites/).
 
@@ -44,5 +44,5 @@ O app sai como página única (`web.output: "single"`), e o `vercel.json` manda 
 
 Em **Authentication → URL Configuration** ([Redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls)):
 
-- **Site URL**: `https://pontinho.vercel.app`. É para onde volta o link do e-mail de login.
-- **Redirect URLs**: adicione `https://pontinho.vercel.app/**`. O login com Google no navegador volta para o endereço do próprio app.
+- **Site URL**: `https://dotwizer-mobile.vercel.app`. É para onde volta o link do e-mail de login.
+- **Redirect URLs**: adicione `https://dotwizer-mobile.vercel.app/**`. O login com Google no navegador volta para o endereço do próprio app.
