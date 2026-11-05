@@ -36,6 +36,9 @@ jobs:
       - run: npm test
       - run: npm run build --workspace @pontinho/game
       - run: node --input-type=module -e "await import('./apps/game/build/app.config.js')"
+        env:
+          API_URL: http://localhost:3000
+          SERVICE_TOKEN: ci
       - run: npm run build --workspace @pontinho/api
       - run: node --input-type=module -e "await import('./apps/api/build/app.js')"
       - run: npm run check:bundle --workspace @pontinho/mobile
