@@ -60,10 +60,14 @@ const envSchema = baseEnvSchema
     path: ["PAYMENT_PROVIDER"],
     message: "PAYMENT_PROVIDER test is not allowed in production",
   })
-  .refine(({ NODE_ENV, DEV_LOGIN_SECRET }) => NODE_ENV !== "production" || DEV_LOGIN_SECRET === undefined, {
-    path: ["DEV_LOGIN_SECRET"],
-    message: "DEV_LOGIN_SECRET is not allowed in production",
-  });
+  .refine(
+    ({ NODE_ENV, DEV_LOGIN_SECRET }) =>
+      NODE_ENV === "development" || NODE_ENV === "test" || DEV_LOGIN_SECRET === undefined,
+    {
+      path: ["DEV_LOGIN_SECRET"],
+      message: "DEV_LOGIN_SECRET is only allowed in development and test",
+    },
+  );
 
 export type Env = z.infer<typeof envSchema>;
 

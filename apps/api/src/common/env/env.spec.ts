@@ -64,11 +64,13 @@ describe("loadEnv", () => {
     );
   });
 
-  it("refuses the test login secret in production", () => {
-    assert.throws(
-      () => loadEnv({ source: { ...validSource, NODE_ENV: "production", DEV_LOGIN_SECRET: "s".repeat(32) } }),
-      /DEV_LOGIN_SECRET/,
-    );
+  it("refuses the test login secret in staging and production", () => {
+    for (const nodeEnv of ["staging", "production"]) {
+      assert.throws(
+        () => loadEnv({ source: { ...validSource, NODE_ENV: nodeEnv, DEV_LOGIN_SECRET: "s".repeat(32) } }),
+        /DEV_LOGIN_SECRET/,
+      );
+    }
   });
 
   it("accepts the test login secret in development", () => {
