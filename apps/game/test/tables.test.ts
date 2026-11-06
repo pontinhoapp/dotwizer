@@ -1,8 +1,9 @@
 import assert from "assert";
+import { JOIN_REFUSALS } from "@pontinho/protocol";
 import { setupServer } from "./support/harness.js";
 
 describe("table list", () => {
-  const { api, connect, createRoom, getTables } = setupServer();
+  const { api, connect, connectWith, createRoom, getTables } = setupServer();
 
   function tableOf(body: { tables: { table: number; players: { nickname: string; photoUrl: string }[] }[] }, table: number) {
     return body.tables.find((listing) => listing.table === table);
@@ -45,6 +46,24 @@ describe("table list", () => {
     const { data } = await getTables(api.addAccount("Edu"));
 
     assert.ok(data.tables.every((listing: { players: unknown[] }) => listing.players.length === 0));
+  });
+
+  it("stops asking the API after 30 entries from the same IP in a minute", async () => {
+    const token = api.addAccount("Ana");
+    for (let entry = 0; entry < 30; entry++) {
+      await getTables(token);
+    }
+
+    const refused = await getTables(token).catch((error: { statusCode: number; data: unknown }) => error);
+    const room = await createRoom({ bots: false, table: 1 });
+
+    assert.strictEqual(refused.statusCode, 429);
+    assert.deepStrictEqual(refused.data, { code: "tooManyRequests" });
+    await assert.rejects(connectWith(room, token, { bots: false, table: 1 }), (error: { code: number; message: string }) => {
+      assert.deepStrictEqual({ code: error.code, message: error.message }, JOIN_REFUSALS.tooManyRequests);
+      return true;
+    });
+    assert.strictEqual(api.playerEntries.length, 30);
   });
 
   it("asks for a valid token", async () => {

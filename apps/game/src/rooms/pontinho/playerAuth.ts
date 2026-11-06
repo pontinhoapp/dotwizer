@@ -1,7 +1,8 @@
-import { ServerError } from "colyseus";
+import { ServerError, type AuthContext } from "colyseus";
 import { createOptionsSchema, JOIN_REFUSALS, openMatchRefusalMessage, PRACTICE_TABLE, type JoinRefusal } from "@pontinho/protocol";
 import { describeFailure, GameApiError, type GameApi } from "../../gameApi/GameApi.js";
 import { NO_WINNER } from "./ChipsMatch.js";
+import { CLIENT_IP_HEADER, entryLimit } from "./entryLimit.js";
 import { openMatches } from "./openMatches.js";
 
 export type PlayerAuth = { id: string; name: string; photoUrl: string; table: number };
@@ -53,7 +54,10 @@ function logEntryFailure(error: unknown) {
   log("Falha ao consultar o jogador na API:", describeFailure(error));
 }
 
-export async function enter(gameApi: GameApi, accessToken: string, table: number | undefined) {
+export async function enter(gameApi: GameApi, accessToken: string, table: number | undefined, ip: string) {
+  if (!entryLimit.allow(ip)) {
+    throw refuse("tooManyRequests");
+  }
   try {
     return await gameApi.playerEntry({ accessToken, table });
   } catch (error) {
@@ -66,7 +70,7 @@ export async function enter(gameApi: GameApi, accessToken: string, table: number
 }
 
 export function createPlayerAuthenticator(gameApi: GameApi) {
-  return async (token: string | undefined, options: unknown): Promise<PlayerAuth> => {
+  return async (token: string | undefined, options: unknown, context: AuthContext): Promise<PlayerAuth> => {
     if (!token) {
       throw refuse("invalidToken");
     }
@@ -75,7 +79,8 @@ export function createPlayerAuthenticator(gameApi: GameApi) {
       throw refuse("invalidOptions");
     }
     const chipsTable = parsed.data.bots ? undefined : parsed.data.table;
-    const entry = await enter(gameApi, token, chipsTable);
+    const ip = context.headers.get(CLIENT_IP_HEADER) ?? context.ip ?? "";
+    const entry = await enter(gameApi, token, chipsTable, ip);
     if (!entry.profileComplete || entry.nickname === null) {
       throw refuse("profileIncomplete");
     }

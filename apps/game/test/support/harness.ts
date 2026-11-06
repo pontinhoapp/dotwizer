@@ -3,6 +3,7 @@ import { ColyseusTestServer, boot } from "@colyseus/testing";
 import { matchMaker } from "colyseus";
 import { cardById, type Game } from "@pontinho/rules";
 import { createServer } from "../../src/createServer.js";
+import { CLIENT_IP_HEADER, entryLimit } from "../../src/rooms/pontinho/entryLimit.js";
 import type { PontinhoRoom } from "../../src/rooms/pontinho/PontinhoRoom.js";
 import { FakeGameApi, statusOf } from "./fakeGameApi.js";
 
@@ -86,17 +87,21 @@ export function advance(room: PontinhoRoom, milliseconds: number) {
   room.clock.tick();
 }
 
+const CLIENT_IP = "203.0.113.7";
+
 export function setupServer() {
   const api = new FakeGameApi();
   let server: ColyseusTestServer<ReturnType<typeof createServer>>;
 
   before(async () => {
     server = await boot(createServer(api));
+    server.sdk.http.options.headers = { [CLIENT_IP_HEADER]: CLIENT_IP };
   });
   after(async () => server.shutdown());
   beforeEach(async () => {
     await server.cleanup();
     api.reset();
+    entryLimit.reset();
   });
 
   async function connectWith(room: PontinhoRoom, token: string, options: object) {
@@ -138,7 +143,8 @@ export function setupServer() {
   }
 
   function getTables(token?: string) {
-    return server.http.get("/tables", { headers: token ? { authorization: `Bearer ${token}` } : {} });
+    const authorization = token ? { authorization: `Bearer ${token}` } : {};
+    return server.http.get("/tables", { headers: { [CLIENT_IP_HEADER]: CLIENT_IP, ...authorization } });
   }
 
   return { api, connect, connectWith, createRoom, getTables, joinOrCreate, reconnect, startMatchWith };

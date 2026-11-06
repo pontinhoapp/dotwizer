@@ -37,6 +37,9 @@ export function toJoinFailure(error: unknown): JoinFailure {
   if (refusal === "profileIncomplete") {
     return { kind: "profileIncomplete" };
   }
+  if (refusal === "tooManyRequests") {
+    return { kind: "refused", text: errors.tooManyRequests };
+  }
   if (!refusal || refusal === "entryFailed") {
     return { kind: "refused", text: home.joinFailed };
   }

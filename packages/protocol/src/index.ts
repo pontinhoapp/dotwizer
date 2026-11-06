@@ -135,6 +135,7 @@ export const JOIN_REFUSALS = {
   openMatch: { code: 409, message: "openMatch" },
   accountDisabled: { code: 403, message: "accountDisabled" },
   entryFailed: { code: 500, message: "entryFailed" },
+  tooManyRequests: { code: 429, message: "tooManyRequests" },
 } as const;
 export type JoinRefusal = keyof typeof JOIN_REFUSALS;
 

@@ -17,6 +17,9 @@ async function fetchTables(): Promise<TablesResponse> {
   if (response.status === JOIN_REFUSALS.accountDisabled.code) {
     await endSession("accountDisabled");
   }
+  if (response.status === JOIN_REFUSALS.tooManyRequests.code) {
+    throw new Error(errors.tooManyRequests);
+  }
   if (!response.ok) {
     throw new Error(errors.generic);
   }

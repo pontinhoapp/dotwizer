@@ -3,6 +3,7 @@ import { matchMaker, ServerError } from "colyseus";
 import { CHIP_TABLES } from "@pontinho/rules";
 import { JOIN_REFUSALS, ROOM_NAME, type SeatedPlayer, type TablesResponse } from "@pontinho/protocol";
 import type { GameApi } from "../../gameApi/GameApi.js";
+import { CLIENT_IP_HEADER } from "./entryLimit.js";
 import { enter } from "./playerAuth.js";
 
 const BEARER_PATTERN = /^Bearer (.+)$/i;
@@ -20,7 +21,7 @@ export function tableList(gameApi: GameApi) {
       return;
     }
     try {
-      await enter(gameApi, token, undefined);
+      await enter(gameApi, token, undefined, request.get(CLIENT_IP_HEADER) ?? request.ip ?? "");
     } catch (error) {
       if (!(error instanceof ServerError)) {
         throw error;
