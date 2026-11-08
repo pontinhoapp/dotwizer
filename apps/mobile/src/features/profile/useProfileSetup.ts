@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { isValidCpf, type ApiErrorCode } from "@pontinho/api-contract";
+import { isValidCpf, NICKNAME_MAX_LENGTH, nicknameSchema, type ApiErrorCode } from "@pontinho/api-contract";
 import { ApiError } from "@/shared/api/client";
 import { profileQueryOptions, register } from "@/shared/api/profile";
 import { CPF_INPUT_LENGTH, cpfDigits, formatCpf } from "@/shared/format/cpf";
@@ -16,7 +16,7 @@ function errorCodeOf(error: Error | null) {
   return undefined;
 }
 
-function typedError({ text, length, left, valid, message }: { text: string; length: number; left: boolean; valid: boolean; message: string }) {
+export function typedError({ text, length, left, valid, message }: { text: string; length: number; left: boolean; valid: boolean; message: string }) {
   const typed = text.length > 0 && (left || text.length === length);
   if (typed && !valid) {
     return message;
@@ -33,6 +33,7 @@ export function useProfileSetup() {
   const [birthDateText, setBirthDateText] = useState(() => (profile?.birthDate ? toBirthDateInput(profile.birthDate) : ""));
   const [birthDateLeft, setBirthDateLeft] = useState(false);
   const [nickname, setNickname] = useState(profile?.nickname ?? "");
+  const [nicknameLeft, setNicknameLeft] = useState(Boolean(profile?.nickname));
   const [confirming, setConfirming] = useState(false);
   const save = useMutation({
     mutationFn: register,
@@ -48,7 +49,8 @@ export function useProfileSetup() {
   const cpf = cpfDigits(cpfText);
   const cpfValid = isValidCpf(cpf);
   const birthDate = toIsoDate(birthDateText);
-  const canSave = fullName.trim().length > 0 && cpfValid && birthDate !== undefined && nickname.trim().length > 0;
+  const nicknameValid = nicknameSchema.safeParse(nickname).success;
+  const canSave = fullName.trim().length > 0 && cpfValid && birthDate !== undefined && nicknameValid;
   const errorCode = errorCodeOf(save.error);
 
   function edit(setter: (text: string) => void) {
@@ -91,6 +93,8 @@ export function useProfileSetup() {
     ),
     nickname,
     changeNickname: edit(setNickname),
+    leaveNickname: () => setNicknameLeft(true),
+    nicknameError: typedError({ text: nickname, length: NICKNAME_MAX_LENGTH, left: nicknameLeft, valid: nicknameValid, message: profileMessages.invalidNickname }),
     canSave,
     confirming,
     review: () => setConfirming(canSave),

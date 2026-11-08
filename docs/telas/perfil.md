@@ -44,7 +44,7 @@ Os erros que valem para toda rota estão em [erros comuns](erros-comuns.md).
 - O CPF aparece mascarado e o Sair não pede confirmação. Até chegarem os bonecos da cliente, a foto mostra a inicial do nome. (Plano.md, fatia 2, «Decisões do Lucas (04/11/2026)»)
 - Sem troca de e-mail nesta fatia: no perfil, o e-mail aparece só para leitura. O celular é opcional, validado só com 11 dígitos. (Plano.md, fatia 2, «Cortes do Lucas (05/11/2026)»)
 - Celular sem confirmação por SMS. (Plano.md, «Decisões», Contato)
-- Apelido de 1 a 20 caracteres e editável. (Lucas, 04/11/2026, plano da fatia 2 aprovado: "segue as sugestões")
+- Apelido editável. (Lucas, 04/11/2026, plano da fatia 2 aprovado: "segue as sugestões") A regra de 3 a 15 caracteres, sem emoji, é a mesma do cadastro. (Lucas, 06/11/2026 e 08/11/2026)
 - Excluir a conta desativa e mantém o extrato. (Plano.md, «Decisões», Excluir conta) A exclusão não solta o CPF e é recusada com partida aberta. (Lucas, 04/11/2026, plano da fatia 2 aprovado)
 - O `DELETE /profile` trava a linha da conta antes de conferir a partida aberta, como o começo de partida faz. É comportamento do código.
 

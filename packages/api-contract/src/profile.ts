@@ -4,6 +4,7 @@ import { isoDateSchema, userIdSchema } from "./common.ts";
 
 const CPF_PATTERN = /^\d{11}$/;
 const REPEATED_DIGITS = /^(\d)\1{10}$/;
+const NICKNAME_PATTERN = /^[ -~\p{L}]+$/u;
 
 function cpfCheckDigit(digits: number[]) {
   const sum = digits.reduce((total, digit, index) => total + digit * (digits.length + 1 - index), 0);
@@ -24,7 +25,14 @@ export const cpfSchema = z
   .refine(isValidCpf, { message: "CPF inválido" })
   .describe("CPF com os 11 dígitos, sem máscara. Os dois dígitos verificadores são conferidos.");
 
-const nicknameSchema = z.string().trim().min(1).max(NICKNAME_MAX_LENGTH).describe("Apelido no jogo, de 1 a 20 caracteres. É o nome que aparece na mesa.");
+export const nicknameSchema = z
+  .string()
+  .trim()
+  .normalize()
+  .min(3)
+  .max(NICKNAME_MAX_LENGTH)
+  .regex(NICKNAME_PATTERN)
+  .describe("Apelido no jogo, de 3 a 15 caracteres: letras, números, espaço e símbolos do teclado, sem emoji. É o nome que aparece na mesa.");
 
 export const phoneSchema = z
   .string()

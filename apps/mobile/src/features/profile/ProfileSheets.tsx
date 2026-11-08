@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { NICKNAME_MAX_LENGTH, phoneSchema } from "@pontinho/api-contract";
+import { NICKNAME_MAX_LENGTH, nicknameSchema, phoneSchema } from "@pontinho/api-contract";
 import { Button } from "@/shared/ui/Button";
 import { ErrorLine } from "@/shared/ui/Notice";
 import { TextField } from "@/shared/ui/TextField";
@@ -8,6 +8,7 @@ import { colors } from "@/shared/theme/colors";
 import { fonts } from "@/shared/theme/fonts";
 import lobby from "@/messages/lobby.json";
 import profile from "@/messages/profile.json";
+import { typedError } from "./useProfileSetup";
 
 type SaveProps = { saving: boolean; error: string };
 
@@ -25,7 +26,9 @@ export function PhotoSheet({ onPick, onClose }: { onPick: () => void; onClose: (
 
 export function NicknameSheet({ current, saving, error, onSave }: SaveProps & { current: string; onSave: (nickname: string) => void }) {
   const [nickname, setNickname] = useState(current);
-  const canSave = nickname.trim().length > 0 && !saving;
+  const [left, setLeft] = useState(false);
+  const valid = nicknameSchema.safeParse(nickname).success;
+  const canSave = valid && !saving;
 
   function save() {
     if (!canSave) {
@@ -37,7 +40,16 @@ export function NicknameSheet({ current, saving, error, onSave }: SaveProps & { 
   return (
     <>
       <View style={styles.field}>
-        <TextField label={profile.nicknameLabel} value={nickname} onChangeText={setNickname} maxLength={NICKNAME_MAX_LENGTH} onSubmitEditing={save} autoFocus />
+        <TextField
+          label={profile.nicknameLabel}
+          value={nickname}
+          onChangeText={setNickname}
+          maxLength={NICKNAME_MAX_LENGTH}
+          onBlur={() => setLeft(true)}
+          error={typedError({ text: nickname, length: NICKNAME_MAX_LENGTH, left, valid, message: profile.invalidNickname })}
+          onSubmitEditing={save}
+          autoFocus
+        />
         <Text style={styles.hint}>{profile.nicknameHint}</Text>
       </View>
       <ErrorLine text={error} />

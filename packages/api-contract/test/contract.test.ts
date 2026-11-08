@@ -2,6 +2,7 @@ import assert from "node:assert";
 import { randomUUID } from "node:crypto";
 import { MIN_PLAYERS, ONLINE_MAX_PLAYERS } from "@pontinho/rules";
 import {
+  nicknameSchema,
   buyBodySchema,
   buyHeadersSchema,
   IDEMPOTENCY_KEY_HEADER,
@@ -37,10 +38,13 @@ describe("api-contract", () => {
     assert.strictEqual(result.nickname, "Ana");
   });
 
-  it("limits the full name to 100 characters and the nickname to 20", () => {
+  it("limits the full name to 100 characters and the nickname to 3 to 15", () => {
     assert.strictEqual(registrationBodySchema.safeParse({ ...registration, fullName: "A".repeat(100) }).success, true);
     assert.strictEqual(registrationBodySchema.safeParse({ ...registration, fullName: "A".repeat(101) }).success, false);
-    assert.strictEqual(registrationBodySchema.safeParse({ ...registration, nickname: "A".repeat(21) }).success, false);
+    assert.strictEqual(registrationBodySchema.safeParse({ ...registration, nickname: "A".repeat(15) }).success, true);
+    assert.strictEqual(registrationBodySchema.safeParse({ ...registration, nickname: "A".repeat(16) }).success, false);
+    assert.strictEqual(registrationBodySchema.safeParse({ ...registration, nickname: "Al" }).success, false);
+    assert.strictEqual(registrationBodySchema.safeParse({ ...registration, nickname: " Al " }).success, false);
     assert.strictEqual(registrationBodySchema.safeParse({ ...registration, fullName: " " }).success, false);
   });
 
@@ -57,6 +61,22 @@ describe("api-contract", () => {
     assert.strictEqual(updateProfileBodySchema.safeParse({ phone: "51998765432" }).success, true);
     assert.strictEqual(updateProfileBodySchema.safeParse({ phone: "5198765432" }).success, false);
     assert.strictEqual(updateProfileBodySchema.safeParse({ phone: "(51) 99876-5432" }).success, false);
+  });
+
+  it("accepts letters with accents, numbers, spaces and keyboard symbols in the nickname", () => {
+    for (const nickname of ["João", "Maçã 10", "ana.b-c_d", "*#!@$%&", "Jose\u0301 Luis"]) {
+      assert.strictEqual(nicknameSchema.safeParse(nickname).success, true, nickname);
+    }
+  });
+
+  it("stores a decomposed accent as a single character", () => {
+    assert.strictEqual(nicknameSchema.parse("Joa\u0303o"), "João");
+  });
+
+  it("rejects emoji and invisible characters in the nickname", () => {
+    for (const nickname of ["Ana 😀", "😀😀😀", "1️⃣23", "🇧🇷🇧🇷", "An\u200Da", "❤️Ana"]) {
+      assert.strictEqual(nicknameSchema.safeParse(nickname).success, false, nickname);
+    }
   });
 
   it("changes only nickname, phone and photo in the profile", () => {

@@ -183,16 +183,20 @@ describe("profile routes", () => {
     assert.strictEqual(response.statusCode, 400);
   });
 
-  it("rejects an invalid birth date, an invalid CPF and a nickname that is too long", async () => {
+  it("rejects an invalid birth date, an invalid CPF and a nickname out of the rule", async () => {
     const { headers } = await testApp.signIn();
 
     const badDate = await register(headers, { ...registration, birthDate: "1990-02-31" });
     const badCpf = await register(headers, { ...registration, cpf: "11144477736" });
-    const longNickname = await register(headers, { ...registration, nickname: "A".repeat(21) });
+    const longNickname = await register(headers, { ...registration, nickname: "A".repeat(16) });
+    const shortNickname = await register(headers, { ...registration, nickname: "Al" });
+    const emojiNickname = await register(headers, { ...registration, nickname: "Ana 😀" });
 
     assert.strictEqual(badDate.statusCode, 400);
     assert.strictEqual(badCpf.statusCode, 400);
     assert.strictEqual(longNickname.statusCode, 400);
+    assert.strictEqual(shortNickname.statusCode, 400);
+    assert.strictEqual(emojiNickname.statusCode, 400);
   });
 
   function update(headers: { authorization: string }, payload: Record<string, unknown>) {

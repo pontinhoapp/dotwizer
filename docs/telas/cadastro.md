@@ -10,7 +10,8 @@ Código: `apps/mobile/src/features/profile/ProfileSetupScreen.tsx` e `useProfile
 
 Antes de enviar, o app confere e só liga o "Salvar" com tudo válido:
 
-- nome completo e apelido não vazios (de 1 a 100 e de 1 a 20 caracteres, cortados pelo `maxLength`);
+- nome completo de 1 a 100 caracteres, cortado pelo `maxLength`;
+- apelido válido pelo `nicknameSchema` do `packages/api-contract`, o mesmo da API. Errado: `profile.invalidNickname` no campo;
 - CPF com 11 dígitos e os dígitos verificadores certos (`isValidCpf` do `packages/api-contract`, o mesmo da API). O campo mostra a máscara `000.000.000-00` e envia só os dígitos. Errado: `profile.invalidCpf` no campo;
 - data de nascimento real no formato `DD/MM/AAAA`. Errada: `profile.invalidBirthDate` no campo.
 
@@ -44,7 +45,8 @@ Editar qualquer campo apaga o erro que veio da API.
 - Nome completo, CPF e data de nascimento são pedidos uma vez e travam ao salvar. Um CPF por conta, com os dígitos conferidos. (Plano.md, «Decisões», Cadastro)
 - 18 anos ou mais, com a data de nascimento no cadastro; menores bloqueados. (Plano.md, «Decisões», Idade)
 - O cadastro não tem foto e tem uma tela de conferência antes de travar os dados. Contas sem CPF vão para o cadastro completar ao entrar. (Plano.md, fatia 2, «Decisões do Lucas (04/11/2026)»)
-- Nome completo de 1 a 100 caracteres, sem exigir sobrenome; apelido de 1 a 20, sem precisar ser único. O `name` da Fatia 1 virou o apelido. (Lucas, 04/11/2026, plano da fatia 2 aprovado: "segue as sugestões")
+- Nome completo de 1 a 100 caracteres, sem exigir sobrenome; apelido sem precisar ser único. O `name` da Fatia 1 virou o apelido. (Lucas, 04/11/2026, plano da fatia 2 aprovado: "segue as sugestões")
+- Apelido de 3 a 15 caracteres, com letras (inclusive acento e ç), números, espaço e símbolos do teclado, sem emoji. Apelido já gravado fora da regra continua valendo até a pessoa salvar outro. (Lucas, 06/11/2026 e 08/11/2026)
 - O cadastro trava no banco: a gravação só acontece onde o CPF ainda é nulo, e o CPF é `UNIQUE`. Duas abas ao mesmo tempo não passam. É comportamento do código.
 - O CPF confere só o formato e os dígitos, não a situação na Receita. É comportamento do código.
 

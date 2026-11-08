@@ -48,7 +48,15 @@ export function ProfileSetupScreen() {
         error={setup.birthDateError}
       />
       <View style={styles.field}>
-        <TextField label={profile.nicknameLabel} value={setup.nickname} onChangeText={setup.changeNickname} maxLength={NICKNAME_MAX_LENGTH} onSubmitEditing={setup.review} />
+        <TextField
+          label={profile.nicknameLabel}
+          value={setup.nickname}
+          onChangeText={setup.changeNickname}
+          maxLength={NICKNAME_MAX_LENGTH}
+          onBlur={setup.leaveNickname}
+          error={setup.nicknameError}
+          onSubmitEditing={setup.review}
+        />
         <Text style={styles.hint}>{profile.nicknameHint}</Text>
       </View>
       <View style={styles.footer}>
