@@ -6,7 +6,7 @@ describe("generateOpenApiDocument", () => {
     const document = (await generateOpenApiDocument()) as { openapi: string; info: { title: string }; paths: object };
 
     assert.strictEqual(document.openapi, "3.0.3");
-    assert.strictEqual(document.info.title, "Pontinho API");
+    assert.strictEqual(document.info.title, "DotWizer API");
     assert.strictEqual(Object.keys(document.paths).length, 16);
   });
 });

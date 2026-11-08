@@ -2,7 +2,7 @@
   "private": true,
   "name": "@pontinho/api",
   "version": "0.1.0",
-  "description": "Contas, perfil, carteira e compras do Pontinho",
+  "description": "Contas, perfil, carteira e compras do DotWizer",
   "type": "module",
   "main": "build/server.js",
   "engines": {

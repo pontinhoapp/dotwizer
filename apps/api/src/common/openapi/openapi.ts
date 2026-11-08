@@ -12,7 +12,7 @@ interface RegisterOpenApiInput {
 const OPENAPI_DOCUMENT = {
   openapi: "3.0.3",
   info: {
-    title: "Pontinho API",
+    title: "DotWizer API",
     version: "0.1.0",
     description:
       "Contas, perfil, carteira de fichas, loja e rotas internas do servidor do jogo. Erros seguem o envelope `{ statusCode, code, message }`; o `code` é o identificador estável.",
