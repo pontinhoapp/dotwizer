@@ -11,7 +11,7 @@ export function DailyBonus({ available, pending, onClaim }: Props) {
   if (available === false) {
     return (
       <View style={[styles.row, styles.claimed]}>
-        <Icon name="check" size={18} color={colors.muted} />
+        <Icon name="check" size={16} color={colors.muted} />
         <Text style={styles.claimedText}>{wallet.dailyBonusClaimed}</Text>
       </View>
     );
@@ -23,18 +23,18 @@ export function DailyBonus({ available, pending, onClaim }: Props) {
       accessibilityRole="button"
       style={({ pressed }) => [styles.row, styles.button, pressed && styles.pressed, available !== true && !pending && styles.disabled]}
     >
-      {pending ? <ActivityIndicator size="small" color={colors.action} /> : <Icon name="gift" size={20} color={colors.action} />}
+      {pending ? <ActivityIndicator size="small" color={colors.action} /> : <Icon name="gift" size={16} color={colors.action} />}
       <Text style={styles.text}>{wallet.claimDailyBonus.replace("{amount}", String(DAILY_BONUS))}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { height: 52, paddingHorizontal: 16, borderRadius: 14, flexDirection: "row", alignItems: "center", gap: 10 },
+  row: { height: 40, paddingHorizontal: 14, borderRadius: 12, flexDirection: "row", alignItems: "center", gap: 10 },
   button: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line },
   claimed: { borderWidth: 1, borderStyle: "dashed", borderColor: colors.line },
   pressed: { opacity: 0.85 },
   disabled: { opacity: 0.5 },
-  text: { flex: 1, color: colors.text, fontSize: 15, fontFamily: fonts.semibold },
-  claimedText: { flex: 1, color: colors.muted, fontSize: 14, fontFamily: fonts.regular },
+  text: { flex: 1, color: colors.text, fontSize: 14, fontFamily: fonts.semibold },
+  claimedText: { flex: 1, color: colors.muted, fontSize: 13, fontFamily: fonts.regular },
 });

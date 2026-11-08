@@ -1,5 +1,6 @@
 {
   "title": "DotWizer",
+  "officialName": "(Pontinho)",
   "play": "Jogar",
   "connectionClosed": "A conexão com a sala foi encerrada",
   "joinFailed": "Não foi possível entrar na sala",
@@ -14,11 +15,14 @@
     "accountDisabled": "Sua conta está desativada."
   },
   "playOnline": "Jogar online",
-  "playOnlineHint": "7 mesas com fichas",
-  "payments": "Pagamentos",
-  "paymentsHint": "Comprar fichas e receber por Pix",
-  "howToPlay": "Como jogar",
-  "ranking": "Ranking",
-  "comingSoon": "em breve",
-  "profile": "Perfil"
+  "playOnlineHint": "Use suas habilidades on-line com outros jogadores",
+  "train": "Treinar",
+  "trainHint": "Jogo off-line sem fichas",
+  "payments": "Pagamento",
+  "paymentsHint": "Gerenciamento de cartões e contas",
+  "profile": "Perfil",
+  "settings": "Configurações",
+  "stats": "Estatísticas",
+  "manual": "Manual DotWizer",
+  "help": "Ajuda"
 }

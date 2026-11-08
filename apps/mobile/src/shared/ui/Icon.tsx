@@ -25,6 +25,9 @@ const ICONS = {
   photo: { ios: "photo", material: "photo_library" },
   bank: { ios: "building.columns", material: "account_balance" },
   star: { ios: "star.fill", material: "star" },
+  settings: { ios: "gearshape", material: "settings" },
+  stats: { ios: "chart.bar", material: "bar_chart" },
+  help: { ios: "questionmark.circle", material: "help" },
 } satisfies Record<string, { ios: SFSymbol; material: AndroidSymbol }>;
 
 export type IconName = keyof typeof ICONS;

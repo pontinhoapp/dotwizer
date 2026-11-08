@@ -7,13 +7,19 @@ import wallet from "@/messages/wallet.json";
 
 const UNKNOWN_BALANCE = "—";
 
+export function ChipBalance({ balance }: { balance?: number }) {
+  return (
+    <View style={styles.row}>
+      <Icon name="chip" size={18} color={colors.action} />
+      <Text style={styles.value}>{balance === undefined ? UNKNOWN_BALANCE : formatChips(balance)}</Text>
+    </View>
+  );
+}
+
 export function BalanceCard({ balance }: { balance?: number }) {
   return (
     <View style={styles.card}>
-      <View style={styles.row}>
-        <Icon name="chip" size={18} color={colors.action} />
-        <Text style={styles.value}>{balance === undefined ? UNKNOWN_BALANCE : formatChips(balance)}</Text>
-      </View>
+      <ChipBalance balance={balance} />
       <Text style={styles.label}>{wallet.balance}</Text>
     </View>
   );

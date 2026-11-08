@@ -1,6 +1,6 @@
 # Pagamentos
 
-Aberto pelo menu (Pagamentos). Tem dois caminhos: Comprar fichas, só por Pix, e Conta para receber, que cadastra a chave Pix do CPF para o saque.
+Aberto pelo menu (Pagamento). Tem dois caminhos: Comprar fichas, só por Pix, e Conta para receber, que cadastra a chave Pix do CPF para o saque.
 
 Código: `apps/mobile/src/app/payments.tsx`, `apps/mobile/src/app/store.tsx` e `apps/mobile/src/features/store/` (`PaymentsScreen.tsx`, `usePixKey.ts`, `ChipStore.tsx`, `useQuote.ts` e `usePurchase.ts`); na API, `apps/api/src/modules/profile/` (chave Pix) e `apps/api/src/modules/store/` (compra).
 

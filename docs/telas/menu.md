@@ -1,12 +1,13 @@
 # Menu
 
-Primeira tela de quem já tem cadastro. Mostra o saldo, o bônus diário e leva para Jogar online, Jogar (treino com robôs), Pagamentos e Perfil. Como jogar e Ranking aparecem como "em breve".
+Primeira tela de quem já tem cadastro. Mostra a foto, o saldo e o bônus diário, e leva para Jogar (mesas online), Treinar (treino com robôs), Pagamento, Perfil, Configurações, Estatísticas, Manual DotWizer e Ajuda.
 
-Código: `apps/mobile/src/app/index.tsx`, com `useWallet`, `useDailyBonus`, `BalanceCard` e `DailyBonus` de `apps/mobile/src/features/wallet/`.
+Código: `apps/mobile/src/app/index.tsx`, com `useWallet`, `useDailyBonus`, `ChipBalance` e `DailyBonus` de `apps/mobile/src/features/wallet/`.
 
 ## Chamadas
 
 - `GET /wallet` ao abrir e sempre que a tela volta ao foco.
+- `GET /profile` para a foto e o apelido, já em cache pelo guard de login.
 - `POST /wallet/daily-bonus` ao tocar em "Resgatar bônus diário". Depois, sucesso ou erro, o app lê a carteira de novo.
 
 ## Sucesso
@@ -18,10 +19,11 @@ Código: `apps/mobile/src/app/index.tsx`, com `useWallet`, `useDailyBonus`, `Bal
 
 | Item | Vai para |
 |---|---|
-| Jogar online | [jogar online](jogar-online.md) (`/lobby`) |
-| Jogar | [ajuste da partida](ajuste-da-partida.md) (`/training`) |
-| Pagamentos | [pagamentos](pagamentos.md) (`/payments`) |
+| Jogar | [jogar online](jogar-online.md) (`/lobby`) |
+| Treinar | [ajuste da partida](ajuste-da-partida.md) (`/training`) |
+| Pagamento | [pagamentos](pagamentos.md) (`/payments`) |
 | Perfil | [perfil](perfil.md) (`/profile`), onde fica o Sair |
+| Configurações, Estatísticas, Manual DotWizer e Ajuda | Telas vazias, só com o título (`/settings`, `/stats`, `/manual` e `/help`) |
 
 Com uma sala aberta (`room` do `MatchProvider`), o menu manda direto para a mesa.
 
@@ -43,8 +45,9 @@ Os erros que valem para toda rota estão em [erros comuns](erros-comuns.md).
 ## Regra
 
 - Bônus diário de 100 fichas, uma vez por dia, com resgate manual, pelo dia do calendário de Brasília. (Plano.md, «Decisões», Bônus diário)
-- "Jogar online" em destaque no menu. (Plano.md, fatia 2, «Decisões do Lucas (04/11/2026)»)
-- Como jogar e Ranking ficam para depois. (Plano.md, fatia 2)
+- O botão de jogar online fica em destaque no menu. (Plano.md, fatia 2, «Decisões do Lucas (04/11/2026)»)
+- Nomes, textos e ordem dos botões do menu, foto e ficha sem a palavra "Fichas", "(Pontinho)" abaixo do logo e bônus menor, sem anúncio. Como jogar e Ranking saem do menu. (Cliente e Lucas, 08/11/2026)
+- Títulos só com a inicial maiúscula; "(Pontinho)" e o saldo sem "Fichas" valem só no menu; os botões novos abrem telas vazias até a cliente definir o conteúdo. (Lucas, 08/11/2026)
 
 ## Testes
 
