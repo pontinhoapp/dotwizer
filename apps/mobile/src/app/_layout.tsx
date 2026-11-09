@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
@@ -15,6 +16,7 @@ import { ProfileLoadError } from "@/features/profile/ProfileLoadError";
 import { useProfile } from "@/features/profile/useProfile";
 import { queryClient } from "@/shared/api/queryClient";
 import { colors } from "@/shared/theme/colors";
+import { AppSplash } from "@/shared/ui/AppSplash";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -34,26 +36,33 @@ export default function RootLayout() {
 
 function Routes() {
   const { userId } = useSession();
-  const { room } = useMatch();
   const signedIn = Boolean(userId);
   const { profile, loading, failed, retry } = useProfile({ signedIn });
   const [fontsLoaded, fontsFailed] = useFonts({ Onest_400Regular, Onest_500Medium, Onest_600SemiBold, Onest_700Bold, Unbounded_600SemiBold });
-  const ready = userId !== undefined && !loading && (fontsLoaded || fontsFailed !== null);
+  const [splashFinished, setSplashFinished] = useState(false);
+  const fontsReady = fontsLoaded || fontsFailed !== null;
+  const ready = userId !== undefined && !loading && fontsReady;
 
   useEffect(() => {
-    if (ready) {
+    if (fontsReady) {
       SplashScreen.hide();
     }
-  }, [ready]);
+  }, [fontsReady]);
 
-  if (!ready) {
-    return null;
-  }
+  return (
+    <View style={styles.app}>
+      {ready && <AppContent signedIn={signedIn} profileComplete={profile?.complete === true} failed={failed} retry={retry} />}
+      {!splashFinished && <AppSplash fontsReady={fontsReady} appReady={ready} onFinished={() => setSplashFinished(true)} />}
+    </View>
+  );
+}
+
+function AppContent({ signedIn, profileComplete, failed, retry }: { signedIn: boolean; profileComplete: boolean; failed: boolean; retry: () => void }) {
+  const { room } = useMatch();
+
   if (failed) {
     return <ProfileLoadError onRetry={retry} />;
   }
-
-  const profileComplete = profile?.complete === true;
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.night } }}>
@@ -81,3 +90,7 @@ function Routes() {
     </Stack>
   );
 }
+
+const styles = StyleSheet.create({
+  app: { flex: 1, backgroundColor: colors.feltNight },
+});
