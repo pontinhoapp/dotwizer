@@ -14,6 +14,7 @@ import { MatchProvider, useMatch } from "@/features/match/MatchProvider";
 import { ProfileLoadError } from "@/features/profile/ProfileLoadError";
 import { useProfile } from "@/features/profile/useProfile";
 import { queryClient } from "@/shared/api/queryClient";
+import { colors } from "@/shared/theme/colors";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -55,7 +56,7 @@ function Routes() {
   const profileComplete = profile?.complete === true;
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.night } }}>
       <Stack.Protected guard={!signedIn}>
         <Stack.Screen name="(auth)/login" />
       </Stack.Protected>

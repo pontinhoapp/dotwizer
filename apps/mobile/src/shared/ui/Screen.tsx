@@ -1,15 +1,24 @@
 import type { ReactNode } from "react";
-import { KeyboardAvoidingView, ScrollView, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, ScrollView, StyleSheet } from "react-native";
+import Animated, { useReducedMotion } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@/shared/theme/colors";
 
 const KEYBOARD_BEHAVIOR = process.env.EXPO_OS === "ios" ? "padding" : undefined;
+const WEB_ENTRANCE = {
+  animationName: { from: { opacity: 0, transform: [{ translateX: 25 }] }, to: { opacity: 1, transform: [{ translateX: 0 }] } },
+  animationDuration: "200ms",
+  animationTimingFunction: "ease-out",
+} as const;
 
 type Props = { children: ReactNode; glow?: boolean };
 
 export function Screen({ children, glow = false }: Props) {
+  const reduceMotion = useReducedMotion();
+  const animated = process.env.EXPO_OS === "web" && !reduceMotion;
+
   return (
-    <View style={[styles.screen, glow && styles.glow]}>
+    <Animated.View style={[styles.screen, glow && styles.glow, animated && WEB_ENTRANCE]}>
       <SafeAreaView style={styles.fill}>
         <KeyboardAvoidingView behavior={KEYBOARD_BEHAVIOR} style={styles.fill}>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -17,7 +26,7 @@ export function Screen({ children, glow = false }: Props) {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </View>
+    </Animated.View>
   );
 }
 

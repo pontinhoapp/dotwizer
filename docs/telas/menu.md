@@ -47,6 +47,7 @@ Os erros que valem para toda rota estão em [erros comuns](erros-comuns.md).
 - Bônus diário de 100 fichas, uma vez por dia, com resgate manual, pelo dia do calendário de Brasília. (Plano.md, «Decisões», Bônus diário)
 - O botão de jogar online fica em destaque no menu. (Plano.md, fatia 2, «Decisões do Lucas (04/11/2026)»)
 - Nomes, textos e ordem dos botões do menu, foto e ficha sem a palavra "Fichas", "(Pontinho)" abaixo do logo e bônus menor, sem anúncio. Como jogar e Ranking saem do menu. (Cliente e Lucas, 08/11/2026)
+- Na web, cada tela entra deslizando 25 px e surgindo, em 200 ms, a não ser com a preferência de movimento reduzido ligada. O app nativo usa a animação do sistema. (Lucas, 08/11/2026)
 - Títulos só com a inicial maiúscula; "(Pontinho)" e o saldo sem "Fichas" valem só no menu; os botões novos abrem telas vazias até a cliente definir o conteúdo. (Lucas, 08/11/2026)
 
 ## Testes
