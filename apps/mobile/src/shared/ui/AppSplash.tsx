@@ -8,19 +8,18 @@ import home from "@/messages/home.json";
 import { AnimatedLogo, Logo } from "./Logo";
 
 const LOGO_SIZE = 40;
-const LOGO_ANIMATION_MS = 2200;
 const CARD_WIDTH = 92;
-const CARDS_START_MS = 1250;
-const CARD_STEP_MS = 120;
-const CARD_FALL_MS = 300;
-const CARDS_DIM_MS = 1900;
+const CARDS_START_MS = 1200;
+const CARD_STEP_MS = 500;
+const CARD_THROW_MS = 750;
+const CARD_SHADE_MS = 400;
+const SEQUENCE_MS = CARDS_START_MS + 2 * CARD_STEP_MS + CARD_THROW_MS + 100;
 const SPLASH_CARDS = [
   { id: "Q-hearts-1", rank: "Q", suit: "hearts", x: -64, y: 0, rotate: -14 },
   { id: "K-spades-1", rank: "K", suit: "spades", x: 0, y: -14, rotate: 0 },
   { id: "J-diamonds-1", rank: "J", suit: "diamonds", x: 64, y: 0, rotate: 14 },
 ];
 const FADE_OUT_MS = 220;
-const SLOW_LOADING_MS = 3000;
 
 const FADE_OUT = {
   animationName: { from: { opacity: 1 }, to: { opacity: 0 } },
@@ -40,7 +39,7 @@ export function AppSplash({ fontsReady, appReady, onFinished }: Props) {
     if (!fontsReady) {
       return;
     }
-    const timer = setTimeout(() => setLogoShown(true), reduceMotion ? 0 : LOGO_ANIMATION_MS);
+    const timer = setTimeout(() => setLogoShown(true), reduceMotion ? 0 : SEQUENCE_MS);
     return () => clearTimeout(timer);
   }, [fontsReady, reduceMotion]);
 
@@ -48,7 +47,7 @@ export function AppSplash({ fontsReady, appReady, onFinished }: Props) {
     if (!fontsReady) {
       return;
     }
-    const timer = setTimeout(() => setSlow(true), SLOW_LOADING_MS);
+    const timer = setTimeout(() => setSlow(true), SEQUENCE_MS);
     return () => clearTimeout(timer);
   }, [fontsReady]);
 
@@ -80,25 +79,27 @@ function SplashCards({ animated }: { animated: boolean }) {
     <View style={styles.cards}>
       {SPLASH_CARDS.map((card, index) => {
         const place = [{ translateX: card.x }, { translateY: card.y }, { rotate: `${card.rotate}deg` }, { scale: 1 }];
-        const fall = {
+        const throwStart = CARDS_START_MS + index * CARD_STEP_MS;
+        const thrown = {
           animationName: {
-            from: { opacity: 0, transform: [{ translateX: card.x }, { translateY: card.y - 300 }, { rotate: `${card.rotate * 3}deg` }, { scale: 1.35 }] },
-            "60%": { opacity: 1 },
+            from: { opacity: 0, transform: [{ translateX: card.x * 0.4 }, { translateY: 360 }, { rotate: `${card.rotate - 20}deg` }, { scale: 0.92 }] },
+            "25%": { opacity: 1 },
             to: { opacity: 1, transform: place },
           },
-          animationDuration: `${CARD_FALL_MS}ms`,
-          animationDelay: `${CARDS_START_MS + index * CARD_STEP_MS}ms`,
+          animationDuration: `${CARD_THROW_MS}ms`,
+          animationDelay: `${throwStart}ms`,
           animationFillMode: "backwards",
-          animationTimingFunction: cubicBezier(0.2, 0.9, 0.3, 1.2),
+          animationTimingFunction: cubicBezier(0.16, 1, 0.3, 1),
         } as const;
         const dim = {
           animationName: { from: { opacity: 0 }, to: { opacity: 0.4 } },
-          animationDuration: `${CARD_FALL_MS}ms`,
-          animationDelay: `${CARDS_DIM_MS}ms`,
+          animationDuration: `${CARD_SHADE_MS}ms`,
+          animationDelay: `${throwStart + CARD_THROW_MS * 0.6}ms`,
           animationFillMode: "both",
+          animationTimingFunction: "ease-in-out",
         } as const;
         return (
-          <Animated.View key={card.id} style={[styles.card, { transform: place }, animated && fall]}>
+          <Animated.View key={card.id} style={[styles.card, { transform: place }, animated && thrown]}>
             <Card card={card} width={CARD_WIDTH} />
             <Animated.View style={[styles.cardShade, animated ? dim : styles.cardShadeOn]} />
           </Animated.View>
