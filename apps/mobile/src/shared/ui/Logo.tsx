@@ -5,8 +5,8 @@ import { fonts } from "@/shared/theme/fonts";
 import home from "@/messages/home.json";
 
 const DOTLESS_I = "ı";
-const LETTER_STEP_MS = 55;
-const LETTER_DURATION_MS = 220;
+const LETTER_STEP_MS = 90;
+const LETTER_DURATION_MS = 240;
 
 function logoStyles(size: number) {
   const dot = size * 0.24;
@@ -34,7 +34,8 @@ export function Logo({ size }: { size: number }) {
 
 export function AnimatedLogo({ size }: { size: number }) {
   const letters = [...home.title];
-  const { text, dot } = logoStyles(size);
+  const { text: baseText, dot } = logoStyles(size);
+  const text = { ...baseText, textShadowColor: "rgba(0, 0, 0, 0.8)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 14 };
   const center = (letters.length - 1) / 2;
   const dotDelay = letters.length * LETTER_STEP_MS + 60;
 

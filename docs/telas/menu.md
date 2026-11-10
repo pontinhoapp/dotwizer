@@ -48,7 +48,7 @@ Os erros que valem para toda rota estão em [erros comuns](erros-comuns.md).
 - O botão de jogar online fica em destaque no menu. (Plano.md, fatia 2, «Decisões do Lucas (04/11/2026)»)
 - Nomes, textos e ordem dos botões do menu, foto e ficha sem a palavra "Fichas", "(Pontinho)" abaixo do logo e bônus menor, sem anúncio. Como jogar e Ranking saem do menu. (Cliente e Lucas, 08/11/2026)
 - Na web, cada tela entra deslizando 25 px e surgindo, em 200 ms, a não ser com a preferência de movimento reduzido ligada. O app nativo usa a animação do sistema. (Lucas, 08/11/2026)
-- Ao abrir o app, enquanto os dados carregam, aparece a abertura em `apps/mobile/src/shared/ui/AppSplash.tsx`: fundo verde, letras do DotWizer se juntando e o pingo vermelho caindo no "i". Ela dura pelo menos 1 s, fica até os dados chegarem, mostra "Carregando seus dados…" a partir de 3 s e, com movimento reduzido, mostra o logo parado. (Cliente e Lucas, 09/11/2026)
+- Ao abrir o app, enquanto os dados carregam, aparece a abertura em `apps/mobile/src/shared/ui/AppSplash.tsx`: fundo verde, letras do DotWizer se juntando a 90 ms por letra, o pingo vermelho caindo no "i" e, em seguida, dama de copas, rei de espadas e valete de ouros do modelo Jumbo caindo em leque atrás do logo, um a cada 120 ms. Ela dura pelo menos 2,2 s, fica até os dados chegarem, mostra "Carregando seus dados…" a partir de 3 s e, com movimento reduzido, mostra o logo parado. (Cliente e Lucas, 09/11/2026)
 - Títulos só com a inicial maiúscula; "(Pontinho)" e o saldo sem "Fichas" valem só no menu; os botões novos abrem telas vazias até a cliente definir o conteúdo. (Lucas, 08/11/2026)
 
 ## Testes
