@@ -1,8 +1,8 @@
 # Ajuste da partida
 
-Aberto pelo menu (Jogar). A pessoa escolhe o coringa (só o coringão ou também o coringa de vida), de 3 a 6 jogadores e o modelo das cartas, e entra no treino com robôs.
+Aberto pelo menu (Jogar). A pessoa escolhe o coringa (só o coringão ou também o coringa de vida), de 3 a 6 jogadores e entra no treino com robôs. O modelo das cartas é o escolhido em Configurações.
 
-Código: `apps/mobile/src/app/training.tsx`, `apps/mobile/src/features/lobby/TrainingSetup.tsx` e `CardStylePicker.tsx`; a entrada passa pelo `join` do `MatchProvider`. No jogo, `apps/game/src/rooms/pontinho/PontinhoRoom.ts`; no motor, `packages/rules/src/game.ts`.
+Código: `apps/mobile/src/app/training.tsx`, `apps/mobile/src/features/lobby/TrainingSetup.tsx` e `apps/mobile/src/shared/cards/useCardStyle.ts`; a entrada passa pelo `join` do `MatchProvider`. No jogo, `apps/game/src/rooms/pontinho/PontinhoRoom.ts`; no motor, `packages/rules/src/game.ts`.
 
 ## Chamada
 

@@ -1,8 +1,8 @@
 {
   "seats": "Jogadores na mesa",
-  "tableName": "Mesa {id}",
-  "minimumBalance": "Mín. {value}",
-  "pointValue": "Ponto {value}",
+  "minimumBalance": "Mín. {value} fichas",
+  "pointValue": "{value} fichas por ponto",
+  "pointValueOne": "1 ficha por ponto",
   "trainingHint": "Treino: sem fichas",
   "cards": "Cartas",
   "connecting": "Conectando…",
@@ -25,5 +25,8 @@
   "tapToSit": "Toque numa mesa para sentar",
   "emptyTable": "vazia",
   "seated": "{count} de {seats}",
-  "refresh": "Atualizar"
+  "enterTitle": "Entrar na mesa de {table}?",
+  "enterMessage": "Depois de entrar, você só pode sair após 30 segundos, se a partida não tiver começado.",
+  "enter": "Entrar",
+  "cancel": "Cancelar"
 }

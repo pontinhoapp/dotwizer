@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { MIN_PLAYERS, TRAINING_MAX_PLAYERS } from "@pontinho/protocol";
-import type { CardStyleName } from "@/shared/cards/Card";
+import { useCardStyle } from "@/shared/cards/useCardStyle";
 import { Button } from "@/shared/ui/Button";
 import { Icon } from "@/shared/ui/Icon";
 import { ErrorLine } from "@/shared/ui/Notice";
@@ -10,7 +10,6 @@ import { colors } from "@/shared/theme/colors";
 import { fonts } from "@/shared/theme/fonts";
 import home from "@/messages/home.json";
 import lobby from "@/messages/lobby.json";
-import { CardStylePicker } from "./CardStylePicker";
 import type { LobbyChoice } from "./PreRoom";
 
 const SEAT_OPTIONS = Array.from({ length: TRAINING_MAX_PLAYERS - MIN_PLAYERS + 1 }, (_, index) => MIN_PLAYERS + index);
@@ -25,7 +24,7 @@ type Props = { connecting: boolean; error: string; onConfirm: (choice: LobbyChoi
 export function TrainingSetup({ connecting, error, onConfirm }: Props) {
   const [lifeJoker, setLifeJoker] = useState(false);
   const [seats, setSeats] = useState(DEFAULT_SEATS);
-  const [cardStyle, setCardStyle] = useState<CardStyleName>("jumbo");
+  const { cardStyle } = useCardStyle();
 
   return (
     <>
@@ -58,7 +57,6 @@ export function TrainingSetup({ connecting, error, onConfirm }: Props) {
           ))}
         </View>
       </View>
-      <CardStylePicker value={cardStyle} onChange={setCardStyle} />
       <View style={styles.footer}>
         <ErrorLine text={error} />
         <Button title={connecting ? lobby.connecting : home.play} onPress={() => onConfirm({ bots: true, seats, lifeJoker, cardStyle })} loading={connecting} />

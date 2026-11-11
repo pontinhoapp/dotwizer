@@ -19,7 +19,8 @@ import { Measured } from "./Measured";
 import { Melds } from "./Melds";
 import { Piles } from "./Piles";
 import { PlayerPlate } from "./PlayerPlate";
-import { announcementText, hasChips, isOffline, isSittingOut, needsExitConfirmation, tableTitle, wildCardsText, wildOf, type GameState } from "./state";
+import { tableTitle } from "@/shared/format/tableTitle";
+import { announcementText, hasChips, isOffline, isSittingOut, needsExitConfirmation, wildCardsText, wildOf, type GameState } from "./state";
 import { useFlights } from "./useFlights";
 import { useTablePlay } from "./useTablePlay";
 

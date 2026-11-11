@@ -1,9 +1,7 @@
 import type { useRoomState } from "@colyseus/react";
 import { toAnnouncement, type PontinhoState } from "@pontinho/protocol";
-import { CHIP_TABLES, cardById, lifeJokerFor, type Suit, type Wild } from "@pontinho/rules";
-import { formatChips } from "@/shared/format/numbers";
+import { cardById, lifeJokerFor, type Suit, type Wild } from "@pontinho/rules";
 import type { CardView } from "@/shared/cards/Card";
-import lobby from "@/messages/lobby.json";
 import match from "@/messages/match.json";
 
 const TRAINING_TABLE = 0;
@@ -59,10 +57,3 @@ export function wildCardsText(wild: Wild) {
   return wild.suits.map((suit) => cardText({ rank: wild.rank, suit })).join(" ");
 }
 
-export function tableTitle(tableId: number) {
-  const table = CHIP_TABLES.find(({ id }) => id === tableId);
-  if (!table) {
-    return lobby.trainingHint;
-  }
-  return `${lobby.tableName.replace("{id}", String(table.id))} · ${lobby.pointValue.replace("{value}", formatChips(table.pointValue))}`;
-}

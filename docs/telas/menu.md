@@ -23,7 +23,8 @@ Código: `apps/mobile/src/app/index.tsx`, com `useWallet`, `useDailyBonus`, `Chi
 | Treinar | [ajuste da partida](ajuste-da-partida.md) (`/training`) |
 | Pagamento | [pagamentos](pagamentos.md) (`/payments`) |
 | Perfil | [perfil](perfil.md) (`/profile`), onde fica o Sair |
-| Configurações, Estatísticas, Manual DotWizer e Ajuda | Telas vazias, só com o título (`/settings`, `/stats`, `/manual` e `/help`) |
+| Configurações | Escolha do modelo das cartas, guardada no aparelho (`/settings`) |
+| Estatísticas, Manual DotWizer e Ajuda | Telas vazias, só com o título (`/stats`, `/manual` e `/help`) |
 
 Com uma sala aberta (`room` do `MatchProvider`), o menu manda direto para a mesa.
 

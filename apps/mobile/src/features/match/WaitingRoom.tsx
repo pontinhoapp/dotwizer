@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Avatar } from "@/shared/ui/Avatar";
@@ -5,14 +6,27 @@ import { Button } from "@/shared/ui/Button";
 import { colors } from "@/shared/theme/colors";
 import { fonts } from "@/shared/theme/fonts";
 import match from "@/messages/match.json";
-import { isOffline, tableTitle, type GameState } from "./state";
+import { tableTitle } from "@/shared/format/tableTitle";
+import { hasChips, isOffline, type GameState } from "./state";
 import { TurnTimer } from "./TurnTimer";
+
+const EXIT_LOCK_SECONDS = 30;
 
 type Props = { state: GameState; onExit: () => void };
 
 export function WaitingRoom({ state, onExit }: Props) {
+  const [exitLockSeconds, setExitLockSeconds] = useState(hasChips(state) ? EXIT_LOCK_SECONDS : 0);
   const status = match.waiting.replace("{count}", String(state.order.length)).replace("{seats}", String(state.seats));
   const freeSeats = Array.from({ length: Math.max(state.seats - state.order.length, 0) }, (_, index) => index);
+  const exitTitle = exitLockSeconds > 0 ? match.exitIn.replace("{seconds}", String(exitLockSeconds)) : match.exit;
+
+  useEffect(() => {
+    if (exitLockSeconds === 0) {
+      return;
+    }
+    const timer = setTimeout(() => setExitLockSeconds(exitLockSeconds - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [exitLockSeconds]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -47,7 +61,7 @@ export function WaitingRoom({ state, onExit }: Props) {
           ))}
         </View>
       </View>
-      <Button title={match.exit} onPress={onExit} variant="secondary" />
+      <Button title={exitTitle} onPress={onExit} variant="secondary" disabled={exitLockSeconds > 0} />
     </SafeAreaView>
   );
 }

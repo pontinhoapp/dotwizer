@@ -1,10 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
+import { useIsFocused } from "expo-router";
 import { JOIN_REFUSALS, TABLES_PATH, type TablesResponse } from "@pontinho/protocol";
 import { getAccessToken } from "@/shared/api/client";
 import { fetchWithTimeout } from "@/shared/api/fetchWithTimeout";
 import { endSession } from "@/shared/api/sessionEnd";
 import { SERVER_URL } from "@/shared/config/env";
 import errors from "@/messages/errors.json";
+
+const REFRESH_MS = 5000;
 
 async function fetchTables(): Promise<TablesResponse> {
   const headers = { Authorization: `Bearer ${await getAccessToken()}` };
@@ -27,12 +30,8 @@ async function fetchTables(): Promise<TablesResponse> {
 }
 
 export function useTables() {
-  const query = useQuery({ queryKey: ["tables"], queryFn: fetchTables, retry: false });
+  const isFocused = useIsFocused();
+  const query = useQuery({ queryKey: ["tables"], queryFn: fetchTables, retry: false, refetchInterval: REFRESH_MS, subscribed: isFocused });
 
-  return {
-    tables: query.data?.tables,
-    refreshing: query.isFetching,
-    error: query.error?.message ?? "",
-    refresh: () => query.refetch(),
-  };
+  return { tables: query.data?.tables, error: query.error?.message ?? "" };
 }

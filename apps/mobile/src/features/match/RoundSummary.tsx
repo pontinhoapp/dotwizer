@@ -10,7 +10,8 @@ import { ChipsAmount } from "./ChipsAmount";
 import { ExitButton } from "./ExitButton";
 import { MatchEnd } from "./MatchEnd";
 import { ReturnPrompt } from "./ReturnPrompt";
-import { announcementText, hasChips, isSittingOut, needsExitConfirmation, tableTitle, type GameState } from "./state";
+import { tableTitle } from "@/shared/format/tableTitle";
+import { announcementText, hasChips, isSittingOut, needsExitConfirmation, type GameState } from "./state";
 
 type Props = { room: Room<PontinhoState>; state: GameState; userId?: string; onExit: () => void };
 

@@ -6,6 +6,7 @@
   "offline": "Offline",
   "sittingOut": "Fora da partida",
   "exit": "Sair",
+  "exitIn": "Sair em {seconds} s",
   "exitConfirm": {
     "message": "Sair da partida? O jogo joga por você até o fim da rodada.",
     "confirm": "Sair",
