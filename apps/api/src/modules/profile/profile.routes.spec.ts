@@ -28,7 +28,7 @@ describe("profile routes", () => {
       cpf: null,
       birthDate: null,
       phone: null,
-      address: null,
+      address: null, bankAccount: null,
       photoUrl: null,
       pixKeyRegistered: false,
       complete: false,
@@ -234,6 +234,39 @@ describe("profile routes", () => {
     assert.strictEqual(phone.statusCode, 400);
   });
 
+  const bankAccount = { bankCode: "260", bankName: "Nubank", branch: "0001", account: "1234567", accountDigit: "8", type: "checking" };
+
+  function saveBankAccount(headers: { authorization: string }, payload: Record<string, unknown>) {
+    return testApp.app.inject({ method: "PUT", url: "/profile/bank-account", headers, payload });
+  }
+
+  it("saves and replaces the bank account after the registration", async () => {
+    const { headers } = await testApp.signIn();
+    await register(headers);
+
+    const saved = await saveBankAccount(headers, bankAccount);
+    const replaced = await saveBankAccount(headers, { ...bankAccount, type: "savings" });
+    const read = await testApp.app.inject({ method: "GET", url: "/profile", headers });
+
+    assert.strictEqual(saved.statusCode, 200);
+    assert.deepStrictEqual(saved.json().bankAccount, bankAccount);
+    assert.strictEqual(replaced.statusCode, 200);
+    assert.deepStrictEqual(read.json().bankAccount, { ...bankAccount, type: "savings" });
+  });
+
+  it("refuses the bank account before the registration and with an invalid branch or bank code", async () => {
+    const { headers } = await testApp.signIn();
+
+    const beforeRegistration = await saveBankAccount(headers, bankAccount);
+    await register(headers);
+    const shortBranch = await saveBankAccount(headers, { ...bankAccount, branch: "001" });
+    const longBankCode = await saveBankAccount(headers, { ...bankAccount, bankCode: "2600" });
+
+    assert.strictEqual(beforeRegistration.statusCode, 409);
+    assert.strictEqual(beforeRegistration.json().code, "registrationRequired");
+    assert.deepStrictEqual([shortBranch.statusCode, longBankCode.statusCode], [400, 400]);
+  });
+
   const address = { postalCode: "90010000", street: "Rua dos Andradas", number: "100", complement: "", district: "Centro Histórico", city: "Porto Alegre", state: "RS" };
 
   it("saves and clears the optional address", async () => {
@@ -371,6 +404,6 @@ describe("profile routes", () => {
 
     const response = await testApp.app.inject({ method: "GET", url: "/profile", headers });
 
-    assert.deepStrictEqual(Object.keys(response.json()).sort(), ["address", "birthDate", "complete", "cpf", "email", "fullName", "id", "nickname", "phone", "photoUrl", "pixKeyRegistered"]);
+    assert.deepStrictEqual(Object.keys(response.json()).sort(), ["address", "bankAccount", "birthDate", "complete", "cpf", "email", "fullName", "id", "nickname", "phone", "photoUrl", "pixKeyRegistered"]);
   });
 });

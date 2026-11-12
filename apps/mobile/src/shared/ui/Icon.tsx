@@ -24,6 +24,7 @@ const ICONS = {
   edit: { ios: "pencil", material: "edit" },
   photo: { ios: "photo", material: "photo_library" },
   bank: { ios: "building.columns", material: "account_balance" },
+  pix: { ios: "qrcode", material: "qr_code_2" },
   star: { ios: "star.fill", material: "star" },
   settings: { ios: "gearshape", material: "settings" },
   stats: { ios: "chart.bar", material: "bar_chart" },

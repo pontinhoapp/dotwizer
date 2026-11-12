@@ -1,5 +1,6 @@
 import type { FastifyPluginAsyncZod } from "@fastify/type-provider-zod";
 import {
+  bankAccountSchema,
   photoUploadBodySchema,
   photoUploadResponseSchema,
   profileResponseSchema,
@@ -61,6 +62,15 @@ const pixKeySchema = {
   response: { 200: profileResponseSchema, ...appErrors({ codes: ["registrationRequired"] }) },
 };
 
+const bankAccountRouteSchema = {
+  summary: "Cadastrar os dados bancários para receber",
+  description: "Grava ou troca a conta bancária. O titular é sempre o CPF do cadastro, então é preciso ter feito o cadastro antes.",
+  tags: [TAGS.profile],
+  security: APP_SECURITY,
+  body: bankAccountSchema,
+  response: { 200: profileResponseSchema, ...appErrors({ codes: ["validationFailed", "registrationRequired"] }) },
+};
+
 const photoUploadSchema = {
   summary: "Pedir a URL assinada para enviar a foto",
   description: "Depois do envio, mande o `path` em `photoPath` no `PATCH /profile`.",
@@ -83,6 +93,7 @@ export function profileRoutes({ service }: { service: ProfileService }): Fastify
       await service.deactivate({ userId: request.auth.userId });
       return reply.status(204).send(null);
     });
+    app.put("/profile/bank-account", { schema: bankAccountRouteSchema }, (request) => service.saveBankAccount({ userId: request.auth.userId, bankAccount: request.body }));
     app.put("/profile/pix-key", { schema: pixKeySchema }, (request) => service.registerPixKey({ userId: request.auth.userId }));
     app.post("/profile/photo-upload", { schema: photoUploadSchema }, (request) =>
       service.requestPhotoUpload({ userId: request.auth.userId, ...request.body }),

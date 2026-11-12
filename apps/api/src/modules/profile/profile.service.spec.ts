@@ -11,7 +11,7 @@ const now = () => new Date("2026-11-02T12:00:00Z");
 const registration = { fullName: "Ana Souza Lima", cpf: "11144477735", birthDate: "1990-05-20", nickname: "Ana" };
 
 function userRecord(overrides: Partial<UserRecord> = {}): UserRecord {
-  return { id: userId, email: "ana@example.com", nickname: null, fullName: null, cpf: null, birthDate: null, phone: null, address: null, photoPath: null, pixKeyRegisteredAt: null, active: true, ...overrides };
+  return { id: userId, email: "ana@example.com", nickname: null, fullName: null, cpf: null, birthDate: null, phone: null, address: null, bankAccount: null, photoPath: null, pixKeyRegisteredAt: null, active: true, ...overrides };
 }
 
 function buildService({ user = userRecord() } = {}) {
@@ -53,7 +53,7 @@ describe("ProfileService", () => {
         fullName: null,
         cpf: null,
         birthDate: null,
-        phone: null, address: null,
+        phone: null, address: null, bankAccount: null,
         photoUrl: null,
         pixKeyRegistered: false,
         complete: false,

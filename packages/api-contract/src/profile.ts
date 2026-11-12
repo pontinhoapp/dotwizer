@@ -52,6 +52,18 @@ export const addressSchema = z
   .describe("Endereço opcional da conta.");
 export type Address = z.infer<typeof addressSchema>;
 
+export const bankAccountSchema = z
+  .strictObject({
+    bankCode: z.string().regex(/^\d{3}$/).describe("Código do banco (COMPE), com 3 dígitos."),
+    bankName: z.string().trim().min(1).max(80).describe("Nome do banco."),
+    branch: z.string().regex(/^\d{4}$/).describe("Agência com 4 dígitos, sem o dígito."),
+    account: z.string().regex(/^\d{1,12}$/).describe("Número da conta, sem o dígito."),
+    accountDigit: z.string().regex(/^[0-9X]$/).describe("Dígito da conta (0 a 9 ou X)."),
+    type: z.enum(["checking", "savings"]).describe("Conta corrente ou poupança."),
+  })
+  .describe("Conta bancária para receber. O titular é sempre o CPF do cadastro.");
+export type BankAccount = z.infer<typeof bankAccountSchema>;
+
 export const profileResponseSchema = z.object({
   id: userIdSchema,
   email: z.string().describe("E-mail da conta, vindo do token do Supabase."),
@@ -62,6 +74,7 @@ export const profileResponseSchema = z.object({
   phone: z.string().nullable().describe("Celular com 11 dígitos, ou nulo quando a conta não tem."),
   address: addressSchema.nullable().describe("Endereço, ou nulo quando a conta não tem."),
   photoUrl: z.string().nullable().describe("URL pública da foto, ou nulo quando a conta não tem foto."),
+  bankAccount: bankAccountSchema.nullable().describe("Conta bancária para receber, ou nulo quando a conta não cadastrou."),
   pixKeyRegistered: z.boolean().describe("Verdadeiro depois que a conta cadastrou a chave Pix do CPF para receber."),
   complete: z.boolean().describe("Verdadeiro quando a conta tem nome completo, CPF, data de nascimento e apelido."),
 });

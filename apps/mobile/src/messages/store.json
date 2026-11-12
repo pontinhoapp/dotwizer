@@ -25,5 +25,22 @@
   "waitingPayment": "Aguardando pagamento",
   "pixCopyPaste": "Pix Copia e Cola",
   "copyCode": "Copiar código",
-  "copied": "Código copiado"
+  "copied": "Código copiado",
+  "pixKeyPath": "Cadastrar chave Pix",
+  "bankAccount": "Dados bancários",
+  "bankAccountMissing": "Cadastre uma conta no seu CPF",
+  "bankAccountRegistered": "{bank} · Ag. {branch} · Conta {account}-{digit}",
+  "bankLabel": "Banco",
+  "chooseBank": "Escolher banco",
+  "otherBank": "Outro banco",
+  "bankCodeLabel": "Código do banco",
+  "bankNameLabel": "Nome do banco",
+  "branchLabel": "Agência",
+  "accountLabel": "Conta",
+  "accountDigitLabel": "Dígito",
+  "accountType": "Tipo de conta",
+  "checking": "Corrente",
+  "savings": "Poupança",
+  "holder": "Titular",
+  "holderNotice": "A conta precisa estar no seu CPF."
 }

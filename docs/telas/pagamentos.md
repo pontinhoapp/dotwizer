@@ -1,16 +1,17 @@
 # Pagamentos
 
-Aberto pelo menu (Pagamento). Tem dois caminhos: Comprar fichas, só por Pix, e Conta para receber, que cadastra a chave Pix do CPF para o saque.
+Aberto pelo menu (Pagamento). Tem três caminhos: Comprar fichas, só por Pix; Cadastrar chave Pix, que cadastra a chave Pix do CPF para o saque; e Dados bancários, com banco, agência, conta e tipo de uma conta no CPF do jogador.
 
-Código: `apps/mobile/src/app/payments.tsx`, `apps/mobile/src/app/store.tsx` e `apps/mobile/src/features/store/` (`PaymentsScreen.tsx`, `usePixKey.ts`, `ChipStore.tsx`, `useQuote.ts` e `usePurchase.ts`); na API, `apps/api/src/modules/profile/` (chave Pix) e `apps/api/src/modules/store/` (compra).
+Código: `apps/mobile/src/app/payments.tsx`, `apps/mobile/src/app/store.tsx` e `apps/mobile/src/features/store/` (`PaymentsScreen.tsx`, `usePixKey.ts`, `BankAccountScreen.tsx`, `banks.ts`, `ChipStore.tsx`, `PixPayment.tsx`, `useQuote.ts` e `usePurchase.ts`); na API, `apps/api/src/modules/profile/` (chave Pix) e `apps/api/src/modules/store/` (compra).
 
 ## Chamadas
 
 | Ação | Chamada | Sucesso |
 |---|---|---|
 | Abrir | `GET /wallet` e `GET /profile` (do cache) | Mostra o saldo e se a chave Pix já foi cadastrada. |
-| Comprar fichas | Abre `/store`: `GET /store/quote?quantity=` a cada quantidade e `POST /store/purchases` com `Idempotency-Key` ao tocar em Comprar | A compra de teste é aprovada na hora; aparece a confirmação e o saldo é relido. |
-| Conta para receber | `PUT /profile/pix-key`, sem corpo, ao tocar em "Cadastrar chave" | Volta para Pagamentos com "Chave Pix (CPF)" e o CPF mascarado. Depois disso, o cartão não abre mais. |
+| Comprar fichas | Abre `/store`: `GET /store/quote?quantity=` a cada quantidade e `POST /store/purchases` com `Idempotency-Key` ao tocar em Comprar | A compra fica pendente e a tela mostra o QR Code, o Pix Copia e Cola com "Copiar código" e "Aguardando pagamento". O app consulta `GET /store/purchases/{id}` a cada 2 s; quando a compra é paga, volta à compra com a confirmação e o saldo relido. Com o provedor de teste, a compra é paga 5 s depois de criada. |
+| Dados bancários | `PUT /profile/bank-account` com banco (da lista ou "Outro banco", com código e nome), agência, conta, dígito e tipo | Volta para Pagamento com o banco, a agência e a conta no cartão. A conta pode ser trocada depois. |
+| Cadastrar chave Pix | `PUT /profile/pix-key`, sem corpo, ao tocar em "Cadastrar chave" | Volta para Pagamentos com "Chave Pix (CPF)" e o CPF mascarado. Depois disso, o cartão não abre mais. |
 
 - A chave é sempre do tipo CPF e vem do cadastro, travada: a tela só mostra o CPF e pede o aceite.
 - A forma de pagamento mostra só o Pix, já escolhido. Até existir o provedor de Pix, a compra é de teste e não cobra nada, sem QR Code.
@@ -44,6 +45,9 @@ Os erros que valem para toda rota estão em [erros comuns](erros-comuns.md).
 - A compra continua de teste, aprovada na hora e sem QR Code, até o provedor de verdade (fatia 5). (Lucas, 04/11/2026, plano da fatia 2 aprovado: "segue as sugestões")
 - A chave grava a data do aceite uma vez só; repetir a chamada não muda a data. É comportamento do código.
 - O pedido de saque não está nesta fatia. (Plano.md, «Próximas fatias», item 5)
+
+- Três caminhos em Pagamento: Comprar fichas, Cadastrar chave Pix e Dados bancários. Os dados bancários pedem banco, agência, conta e tipo, numa conta no CPF do jogador, porque a chave Pix sozinha não mostra a conta. (Cliente, 11/11/2026; Lucas, 12/11/2026: lista curta de bancos digitada, com "Outro banco")
+- Compra por Pix com QR Code e Copia e Cola na tela, que confirma sozinha quando o pagamento cai. Até escolher o provedor real, o Pix é simulado: o provedor de teste deixa a compra pendente e a aprova 5 s depois. (Cliente, 11/11/2026; Lucas, 11/11/2026)
 
 ## Testes
 

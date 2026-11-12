@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import type { PhotoUploadBody, PhotoUploadResponse, ProfileResponse, RegistrationBody, UpdateProfileBody } from "@pontinho/api-contract";
+import type { BankAccount, PhotoUploadBody, PhotoUploadResponse, ProfileResponse, RegistrationBody, UpdateProfileBody } from "@pontinho/api-contract";
 import { request } from "./client";
 
 export function profileQueryOptions() {
@@ -23,6 +23,10 @@ export function requestPhotoUpload(body: PhotoUploadBody) {
 
 export function registerPixKey() {
   return request<ProfileResponse>("/profile/pix-key", { method: "PUT" });
+}
+
+export function saveBankAccount(body: BankAccount) {
+  return request<ProfileResponse>("/profile/bank-account", { method: "PUT", body });
 }
 
 export function deleteAccount() {

@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
+import type { BankAccount } from "@pontinho/api-contract";
 import { profileQueryOptions } from "@/shared/api/profile";
 import { formatCpf, maskCpf } from "@/shared/format/cpf";
 import { goBackOrHome } from "@/shared/navigation/goBackOrHome";
@@ -15,21 +16,27 @@ import { fonts } from "@/shared/theme/fonts";
 import home from "@/messages/home.json";
 import profileMessages from "@/messages/profile.json";
 import store from "@/messages/store.json";
+import { BankAccountScreen } from "./BankAccountScreen";
 import { usePixKey } from "./usePixKey";
 
 type Props = { balanceCard: ReactNode; walletError: string; onRetryWallet: () => void };
 
 export function PaymentsScreen({ balanceCard, walletError, onRetryWallet }: Props) {
   const { data: profile } = useQuery(profileQueryOptions());
-  const [showingAccount, setShowingAccount] = useState(false);
-  const pixKey = usePixKey({ onRegistered: () => setShowingAccount(false) });
+  const [showing, setShowing] = useState<"pixKey" | "bankAccount">();
+  const pixKey = usePixKey({ onRegistered: () => setShowing(undefined) });
   const cpf = profile?.cpf ?? "";
   const registered = profile?.pixKeyRegistered === true;
+  const bankAccount = profile?.bankAccount;
 
-  if (showingAccount) {
+  if (showing === "bankAccount") {
+    return <BankAccountScreen profile={profile} balanceCard={balanceCard} onBack={() => setShowing(undefined)} />;
+  }
+
+  if (showing === "pixKey") {
     return (
       <Screen>
-        <ScreenHeader title={store.receivingAccount} backLabel={store.back} onBack={() => setShowingAccount(false)}>
+        <ScreenHeader title={store.pixKeyPath} backLabel={store.back} onBack={() => setShowing(undefined)}>
           {balanceCard}
         </ScreenHeader>
         <View style={styles.keyType}>
@@ -60,15 +67,30 @@ export function PaymentsScreen({ balanceCard, walletError, onRetryWallet }: Prop
       {walletError !== "" && <Notice text={walletError} tone="danger" onRetry={onRetryWallet} />}
       <PathCard icon="chip" highlighted title={store.buyChips} hint={store.pixOnly} onPress={() => router.push("/store")} />
       <PathCard
-        icon="bank"
-        title={store.receivingAccount}
+        icon="pix"
+        title={store.pixKeyPath}
         hint={registered ? store.receivingAccountRegistered.replace("{cpf}", maskCpf(cpf)) : store.receivingAccountMissing}
         warning={!registered}
         done={registered}
-        onPress={() => setShowingAccount(true)}
+        onPress={() => setShowing("pixKey")}
+      />
+      <PathCard
+        icon="bank"
+        title={store.bankAccount}
+        hint={bankAccount ? bankAccountText(bankAccount) : store.bankAccountMissing}
+        warning={!bankAccount}
+        onPress={() => setShowing("bankAccount")}
       />
     </Screen>
   );
+}
+
+function bankAccountText(bankAccount: BankAccount) {
+  return store.bankAccountRegistered
+    .replace("{bank}", bankAccount.bankName)
+    .replace("{branch}", bankAccount.branch)
+    .replace("{account}", bankAccount.account)
+    .replace("{digit}", bankAccount.accountDigit);
 }
 
 type PathCardProps = { icon: IconName; title: string; hint: string; highlighted?: boolean; warning?: boolean; done?: boolean; onPress: () => void };

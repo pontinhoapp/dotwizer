@@ -1,4 +1,4 @@
-import { addressSchema, type Address } from "@pontinho/api-contract";
+import { addressSchema, bankAccountSchema, type Address, type BankAccount } from "@pontinho/api-contract";
 import { Prisma } from "../../../generated/prisma/client.ts";
 import type { DatabaseClient } from "../../../common/database/database-client.ts";
 import { fromIsoDate, toIsoDate } from "../../../common/database/dates.ts";
@@ -12,6 +12,7 @@ const userSelect = {
   birthDate: true,
   phone: true,
   address: true,
+  bankAccount: true,
   photoPath: true,
   pixKeyRegisteredAt: true,
   active: true,
@@ -28,6 +29,7 @@ export interface UserRecord {
   birthDate: string | null;
   phone: string | null;
   address: Address | null;
+  bankAccount: BankAccount | null;
   photoPath: string | null;
   pixKeyRegisteredAt: Date | null;
   active: boolean;
@@ -72,6 +74,11 @@ interface RegisterPixKeyInput {
   registeredAt: Date;
 }
 
+interface SaveBankAccountInput {
+  id: string;
+  bankAccount: BankAccount;
+}
+
 interface DeactivateInput {
   id: string;
   deactivatedAt: Date;
@@ -82,7 +89,7 @@ interface LockByIdsInput {
 }
 
 function toRecord(row: UserRow): UserRecord {
-  return { ...row, birthDate: row.birthDate ? toIsoDate({ date: row.birthDate }) : null, address: addressSchema.nullable().parse(row.address) };
+  return { ...row, birthDate: row.birthDate ? toIsoDate({ date: row.birthDate }) : null, address: addressSchema.nullable().parse(row.address), bankAccount: bankAccountSchema.nullable().parse(row.bankAccount) };
 }
 
 export class UsersRepository {
@@ -135,6 +142,10 @@ export class UsersRepository {
 
   async registerPixKey({ id, registeredAt }: RegisterPixKeyInput): Promise<void> {
     await this.client.user.updateMany({ where: { id, pixKeyRegisteredAt: null }, data: { pixKeyRegisteredAt: registeredAt } });
+  }
+
+  async saveBankAccount({ id, bankAccount }: SaveBankAccountInput): Promise<void> {
+    await this.client.user.update({ where: { id }, data: { bankAccount } });
   }
 
   async deactivate({ id, deactivatedAt }: DeactivateInput): Promise<void> {

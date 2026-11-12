@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { brasiliaDay } from "@pontinho/rules";
-import type { PhotoUploadBody, PhotoUploadResponse, ProfileResponse, RegistrationBody, UpdateProfileBody } from "@pontinho/api-contract";
+import type { BankAccount, PhotoUploadBody, PhotoUploadResponse, ProfileResponse, RegistrationBody, UpdateProfileBody } from "@pontinho/api-contract";
 import type { UnitOfWork } from "../../common/database/database-client.ts";
 import { ApiError } from "../../common/errors/api-error.ts";
 import { isUniqueConstraintViolation } from "../../common/errors/error-handler.ts";
@@ -34,6 +34,10 @@ interface UserInput {
 interface RegisterInput extends RegistrationBody, UserInput {}
 
 interface UpdateInput extends UpdateProfileBody, UserInput {}
+
+interface SaveBankAccountInput extends UserInput {
+  bankAccount: BankAccount;
+}
 
 interface RequestPhotoUploadInput extends PhotoUploadBody, UserInput {}
 
@@ -99,6 +103,15 @@ export class ProfileService {
     return this.get({ userId });
   }
 
+  async saveBankAccount({ userId, bankAccount }: SaveBankAccountInput): Promise<ProfileResponse> {
+    const user = await this.usersRepository.findById({ id: userId });
+    if (!user?.cpf) {
+      throw new ApiError({ code: "registrationRequired" });
+    }
+    await this.usersRepository.saveBankAccount({ id: userId, bankAccount });
+    return this.get({ userId });
+  }
+
   deactivate({ userId }: UserInput): Promise<void> {
     return this.unitOfWork.run(async (transaction) => {
       await transaction.users.lockByIds({ ids: [userId] });
@@ -126,6 +139,7 @@ export class ProfileService {
       birthDate: user.birthDate,
       phone: user.phone,
       address: user.address,
+      bankAccount: user.bankAccount,
       photoUrl: user.photoPath ? this.avatarStorage.publicUrl({ path: user.photoPath }) : null,
       pixKeyRegistered: user.pixKeyRegisteredAt !== null,
       complete: Boolean(user.fullName && user.cpf && user.birthDate && user.nickname),

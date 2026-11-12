@@ -47,6 +47,7 @@ model User {
   birthDate          DateTime? @map("birth_date") @db.Date
   phone              String?
   address            Json?
+  bankAccount        Json?     @map("bank_account")
   photoPath          String?   @map("photo_path")
   pixKeyRegisteredAt DateTime? @map("pix_key_registered_at") @db.Timestamptz(6)
   active             Boolean   @default(true)
