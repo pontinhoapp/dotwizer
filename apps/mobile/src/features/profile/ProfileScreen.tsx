@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import type { Address } from "@pontinho/api-contract";
 import { useQuery } from "@tanstack/react-query";
 import { profileQueryOptions } from "@/shared/api/profile";
 import { maskCpf } from "@/shared/format/cpf";
@@ -19,13 +20,14 @@ import lobby from "@/messages/lobby.json";
 import profileMessages from "@/messages/profile.json";
 import wallet from "@/messages/wallet.json";
 import { toBirthDateInput } from "./birthDate";
+import { AddressSheet } from "./AddressSheet";
 import { DeleteSheet, NicknameSheet, PhoneSheet, PhotoSheet } from "./ProfileSheets";
 import { useDeleteAccount } from "./useDeleteAccount";
 import { useProfileUpdate } from "./useProfileUpdate";
 
 const UNKNOWN = "—";
 
-type SheetName = "photo" | "nickname" | "phone" | "delete";
+type SheetName = "photo" | "nickname" | "phone" | "address" | "delete";
 
 type SignOut = { signOut: () => void; pending: boolean; error: string };
 
@@ -103,7 +105,8 @@ export function ProfileScreen({ balance, signOut }: Props) {
           <View style={styles.box}>
             <Text style={[styles.boxTitle, styles.boxTitleRow]}>{profileMessages.contact}</Text>
             <ContactLine label={auth.emailLabel} value={profile.email} />
-            <ContactLine label={profileMessages.phoneLabel} value={profile.phone ?? UNKNOWN} onChange={() => open("phone")} last />
+            <ContactLine label={profileMessages.phoneLabel} value={profile.phone ?? UNKNOWN} onChange={() => open("phone")} />
+            <ContactLine label={profileMessages.addressLabel} value={addressSummary(profile.address)} onChange={() => open("address")} last />
           </View>
         </>
       )}
@@ -120,10 +123,18 @@ export function ProfileScreen({ balance, signOut }: Props) {
         {sheet === "photo" && <PhotoSheet onPick={choosePhoto} onClose={close} />}
         {sheet === "nickname" && <NicknameSheet current={profile?.nickname ?? ""} saving={update.saving} error={update.error} onSave={(nickname) => update.save({ nickname })} />}
         {sheet === "phone" && <PhoneSheet current={profile?.phone ?? ""} saving={update.saving} error={update.error} onSave={(phone) => update.save({ phone })} />}
+        {sheet === "address" && <AddressSheet current={profile?.address ?? null} saving={update.saving} error={update.error} onSave={(address) => update.save({ address })} />}
         {sheet === "delete" && <DeleteSheet deleting={deletion.pending} error={deletion.error} onDelete={deletion.remove} onCancel={close} />}
       </Sheet>
     </Screen>
   );
+}
+
+function addressSummary(address: Address | null) {
+  if (!address) {
+    return UNKNOWN;
+  }
+  return `${address.street}, ${address.number} · ${address.city}/${address.state}`;
 }
 
 function DataLine({ label, value, last = false }: { label: string; value: string; last?: boolean }) {

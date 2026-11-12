@@ -11,7 +11,7 @@ const now = () => new Date("2026-11-02T12:00:00Z");
 const registration = { fullName: "Ana Souza Lima", cpf: "11144477735", birthDate: "1990-05-20", nickname: "Ana" };
 
 function userRecord(overrides: Partial<UserRecord> = {}): UserRecord {
-  return { id: userId, email: "ana@example.com", nickname: null, fullName: null, cpf: null, birthDate: null, phone: null, photoPath: null, pixKeyRegisteredAt: null, active: true, ...overrides };
+  return { id: userId, email: "ana@example.com", nickname: null, fullName: null, cpf: null, birthDate: null, phone: null, address: null, photoPath: null, pixKeyRegisteredAt: null, active: true, ...overrides };
 }
 
 function buildService({ user = userRecord() } = {}) {
@@ -53,7 +53,7 @@ describe("ProfileService", () => {
         fullName: null,
         cpf: null,
         birthDate: null,
-        phone: null,
+        phone: null, address: null,
         photoUrl: null,
         pixKeyRegistered: false,
         complete: false,
@@ -137,7 +137,7 @@ describe("ProfileService", () => {
 
       const profile = await service.update({ userId, nickname: "Aninha", phone: "51998765432" });
 
-      assert.deepStrictEqual(updates, [{ id: userId, nickname: "Aninha", phone: "51998765432", photoPath: undefined }]);
+      assert.deepStrictEqual(updates, [{ id: userId, nickname: "Aninha", phone: "51998765432", address: undefined, photoPath: undefined }]);
       assert.strictEqual(profile.nickname, "Aninha");
       assert.strictEqual(profile.phone, "51998765432");
     });
@@ -148,7 +148,7 @@ describe("ProfileService", () => {
 
       await service.update({ userId, photoPath });
 
-      assert.deepStrictEqual(updates, [{ id: userId, nickname: undefined, phone: undefined, photoPath }]);
+      assert.deepStrictEqual(updates, [{ id: userId, nickname: undefined, phone: undefined, address: undefined, photoPath }]);
     });
 
     it("rejects a photo path that belongs to another user", async () => {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AVATAR_CONTENT_TYPES, FULL_NAME_MAX_LENGTH, NICKNAME_MAX_LENGTH } from "./constants.ts";
+import { AVATAR_CONTENT_TYPES, BRAZILIAN_STATES, FULL_NAME_MAX_LENGTH, NICKNAME_MAX_LENGTH } from "./constants.ts";
 import { isoDateSchema, userIdSchema } from "./common.ts";
 
 const CPF_PATTERN = /^\d{11}$/;
@@ -39,6 +39,19 @@ export const phoneSchema = z
   .regex(/^\d{11}$/)
   .describe("Celular com 11 dígitos, sem máscara.");
 
+export const addressSchema = z
+  .strictObject({
+    postalCode: z.string().regex(/^\d{8}$/).describe("CEP com 8 dígitos, sem máscara."),
+    street: z.string().trim().min(1).max(120).describe("Rua."),
+    number: z.string().trim().min(1).max(10).describe("Número, ou S/N."),
+    complement: z.string().trim().max(60).describe("Complemento, que pode ficar vazio."),
+    district: z.string().trim().min(1).max(80).describe("Bairro."),
+    city: z.string().trim().min(1).max(80).describe("Cidade."),
+    state: z.enum(BRAZILIAN_STATES).describe("UF."),
+  })
+  .describe("Endereço opcional da conta.");
+export type Address = z.infer<typeof addressSchema>;
+
 export const profileResponseSchema = z.object({
   id: userIdSchema,
   email: z.string().describe("E-mail da conta, vindo do token do Supabase."),
@@ -47,6 +60,7 @@ export const profileResponseSchema = z.object({
   cpf: z.string().nullable().describe("CPF com os 11 dígitos. Só sai para a própria conta. Nulo até o cadastro, que trava o campo."),
   birthDate: isoDateSchema.nullable().describe("Data de nascimento. Nula até o cadastro, que trava o campo."),
   phone: z.string().nullable().describe("Celular com 11 dígitos, ou nulo quando a conta não tem."),
+  address: addressSchema.nullable().describe("Endereço, ou nulo quando a conta não tem."),
   photoUrl: z.string().nullable().describe("URL pública da foto, ou nulo quando a conta não tem foto."),
   pixKeyRegistered: z.boolean().describe("Verdadeiro depois que a conta cadastrou a chave Pix do CPF para receber."),
   complete: z.boolean().describe("Verdadeiro quando a conta tem nome completo, CPF, data de nascimento e apelido."),
@@ -64,6 +78,7 @@ export type RegistrationBody = z.infer<typeof registrationBodySchema>;
 export const updateProfileBodySchema = z.strictObject({
   nickname: nicknameSchema.optional(),
   phone: phoneSchema.optional(),
+  address: addressSchema.nullable().optional().describe("Endereço novo, ou nulo para apagar."),
   photoPath: z
     .string()
     .min(1)

@@ -1,3 +1,4 @@
+import { addressSchema, type Address } from "@pontinho/api-contract";
 import { Prisma } from "../../../generated/prisma/client.ts";
 import type { DatabaseClient } from "../../../common/database/database-client.ts";
 import { fromIsoDate, toIsoDate } from "../../../common/database/dates.ts";
@@ -10,6 +11,7 @@ const userSelect = {
   cpf: true,
   birthDate: true,
   phone: true,
+  address: true,
   photoPath: true,
   pixKeyRegisteredAt: true,
   active: true,
@@ -25,6 +27,7 @@ export interface UserRecord {
   cpf: string | null;
   birthDate: string | null;
   phone: string | null;
+  address: Address | null;
   photoPath: string | null;
   pixKeyRegisteredAt: Date | null;
   active: boolean;
@@ -55,6 +58,7 @@ interface UpdateInput {
   id: string;
   nickname?: string;
   phone?: string;
+  address?: Address | null;
   photoPath?: string;
 }
 
@@ -78,7 +82,7 @@ interface LockByIdsInput {
 }
 
 function toRecord(row: UserRow): UserRecord {
-  return { ...row, birthDate: row.birthDate ? toIsoDate({ date: row.birthDate }) : null };
+  return { ...row, birthDate: row.birthDate ? toIsoDate({ date: row.birthDate }) : null, address: addressSchema.nullable().parse(row.address) };
 }
 
 export class UsersRepository {
@@ -119,8 +123,9 @@ export class UsersRepository {
     return this.findById({ id });
   }
 
-  async update({ id, nickname, phone, photoPath }: UpdateInput): Promise<UserRecord> {
-    const row = await this.client.user.update({ where: { id }, data: { nickname, phone, photoPath }, select: userSelect });
+  async update({ id, nickname, phone, address, photoPath }: UpdateInput): Promise<UserRecord> {
+    const data = { nickname, phone, photoPath, address: address === null ? Prisma.DbNull : address };
+    const row = await this.client.user.update({ where: { id }, data, select: userSelect });
     return toRecord(row);
   }
 

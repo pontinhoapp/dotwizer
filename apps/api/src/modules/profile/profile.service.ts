@@ -82,11 +82,11 @@ export class ProfileService {
     return this.toResponse({ user });
   }
 
-  async update({ userId, nickname, phone, photoPath }: UpdateInput): Promise<ProfileResponse> {
+  async update({ userId, nickname, phone, address, photoPath }: UpdateInput): Promise<ProfileResponse> {
     if (photoPath !== undefined && !isOwnPhotoPath({ userId, photoPath })) {
       throw new ApiError({ code: "photoNotOwned" });
     }
-    const user = await this.usersRepository.update({ id: userId, nickname, phone, photoPath });
+    const user = await this.usersRepository.update({ id: userId, nickname, phone, address, photoPath });
     return this.toResponse({ user });
   }
 
@@ -125,6 +125,7 @@ export class ProfileService {
       cpf: user.cpf,
       birthDate: user.birthDate,
       phone: user.phone,
+      address: user.address,
       photoUrl: user.photoPath ? this.avatarStorage.publicUrl({ path: user.photoPath }) : null,
       pixKeyRegistered: user.pixKeyRegisteredAt !== null,
       complete: Boolean(user.fullName && user.cpf && user.birthDate && user.nickname),

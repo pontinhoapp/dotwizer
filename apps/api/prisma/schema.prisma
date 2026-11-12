@@ -46,6 +46,7 @@ model User {
   cpf                String?   @unique
   birthDate          DateTime? @map("birth_date") @db.Date
   phone              String?
+  address            Json?
   photoPath          String?   @map("photo_path")
   pixKeyRegisteredAt DateTime? @map("pix_key_registered_at") @db.Timestamptz(6)
   active             Boolean   @default(true)

@@ -1,8 +1,8 @@
 # Perfil
 
-Aberto pelo menu (Perfil). Mostra a foto, o apelido e as fichas; os dados pessoais travados, com o CPF mascarado; o e-mail, só para leitura, e o celular, que pode mudar; e o Sair e o Excluir conta.
+Aberto pelo menu (Perfil). Mostra a foto, o apelido e as fichas; os dados pessoais travados, com o CPF mascarado; o e-mail, só para leitura, e o celular e o endereço, opcionais e editáveis; e o Sair e o Excluir conta.
 
-Código: `apps/mobile/src/app/profile.tsx` e `apps/mobile/src/features/profile/` (`ProfileScreen.tsx`, `ProfileSheets.tsx`, `useProfileUpdate.ts` e `useDeleteAccount.ts`); na API, `apps/api/src/modules/profile/` e `apps/api/src/modules/auth/auth.service.ts`.
+Código: `apps/mobile/src/app/profile.tsx` e `apps/mobile/src/features/profile/` (`ProfileScreen.tsx`, `ProfileSheets.tsx`, `AddressSheet.tsx`, `useProfileUpdate.ts` e `useDeleteAccount.ts`); na API, `apps/api/src/modules/profile/` e `apps/api/src/modules/auth/auth.service.ts`.
 
 ## Chamadas
 
@@ -12,6 +12,8 @@ Código: `apps/mobile/src/app/profile.tsx` e `apps/mobile/src/features/profile/`
 | Trocar foto | Galeria, `POST /profile/photo-upload`, `PUT` do arquivo na URL assinada e `PATCH /profile` com `{ photoPath }` | A foto nova aparece. Sem foto, o avatar mostra a inicial do apelido. |
 | Editar apelido | `PATCH /profile` com `{ nickname }` | A folha fecha e o apelido novo aparece. |
 | Alterar celular | `PATCH /profile` com `{ phone }`, com os 11 dígitos | A folha fecha e o celular aparece, sem máscara. |
+| Alterar endereço | O CEP com 8 dígitos consulta `https://viacep.com.br/ws/{cep}/json/` e preenche rua, bairro, cidade e UF; depois `PATCH /profile` com `{ address }` | A folha fecha e o endereço aparece resumido. Se o ViaCEP falhar, aparece "CEP não encontrado" e os campos ficam livres. |
+| Remover endereço | `PATCH /profile` com `{ address: null }` | O endereço volta a "—". |
 | Sair | `supabase.auth.signOut()` | Volta ao login, sem confirmação. |
 | Excluir conta | `DELETE /profile`, depois `supabase.auth.signOut()` | A API responde 204 e o app volta ao login. |
 
@@ -47,6 +49,8 @@ Os erros que valem para toda rota estão em [erros comuns](erros-comuns.md).
 - Apelido editável. (Lucas, 04/11/2026, plano da fatia 2 aprovado: "segue as sugestões") A regra de 3 a 15 caracteres, sem emoji, é a mesma do cadastro. (Lucas, 06/11/2026 e 08/11/2026)
 - Excluir a conta desativa e mantém o extrato. (Plano.md, «Decisões», Excluir conta) A exclusão não solta o CPF e é recusada com partida aberta. (Lucas, 04/11/2026, plano da fatia 2 aprovado)
 - O `DELETE /profile` trava a linha da conta antes de conferir a partida aberta, como o começo de partida faz. É comportamento do código.
+
+- Endereço opcional, com CEP, rua, número, complemento (pode ficar vazio), bairro, cidade e UF; o CEP preenche o resto pelo ViaCEP. O e-mail continua só para leitura. (Cliente, 11/11/2026; Lucas, 11/11/2026: "CEP preenche o resto")
 
 ## Testes
 

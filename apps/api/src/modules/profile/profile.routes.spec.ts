@@ -28,6 +28,7 @@ describe("profile routes", () => {
       cpf: null,
       birthDate: null,
       phone: null,
+      address: null,
       photoUrl: null,
       pixKeyRegistered: false,
       complete: false,
@@ -233,6 +234,32 @@ describe("profile routes", () => {
     assert.strictEqual(phone.statusCode, 400);
   });
 
+  const address = { postalCode: "90010000", street: "Rua dos Andradas", number: "100", complement: "", district: "Centro Histórico", city: "Porto Alegre", state: "RS" };
+
+  it("saves and clears the optional address", async () => {
+    const { headers } = await testApp.signIn();
+    await register(headers);
+
+    const saved = await update(headers, { address: { ...address, street: "  Rua dos Andradas " } });
+    const read = await testApp.app.inject({ method: "GET", url: "/profile", headers });
+    const cleared = await update(headers, { address: null });
+
+    assert.strictEqual(saved.statusCode, 200);
+    assert.deepStrictEqual(read.json().address, address);
+    assert.strictEqual(cleared.json().address, null);
+  });
+
+  it("refuses an address with a short postal code or an unknown state", async () => {
+    const { headers } = await testApp.signIn();
+    await register(headers);
+
+    const shortPostalCode = await update(headers, { address: { ...address, postalCode: "9001000" } });
+    const unknownState = await update(headers, { address: { ...address, state: "XX" } });
+
+    assert.strictEqual(shortPostalCode.statusCode, 400);
+    assert.strictEqual(unknownState.statusCode, 400);
+  });
+
   it("hands out an upload url inside the user folder and later shows the photo url", async () => {
     const { userId, headers } = await testApp.signIn();
 
@@ -344,6 +371,6 @@ describe("profile routes", () => {
 
     const response = await testApp.app.inject({ method: "GET", url: "/profile", headers });
 
-    assert.deepStrictEqual(Object.keys(response.json()).sort(), ["birthDate", "complete", "cpf", "email", "fullName", "id", "nickname", "phone", "photoUrl", "pixKeyRegistered"]);
+    assert.deepStrictEqual(Object.keys(response.json()).sort(), ["address", "birthDate", "complete", "cpf", "email", "fullName", "id", "nickname", "phone", "photoUrl", "pixKeyRegistered"]);
   });
 });
