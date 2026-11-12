@@ -14,11 +14,12 @@ const paidAt = new Date("2026-11-02T15:00:00Z");
 const idempotencyKey = "22222222-2222-4222-8222-222222222222";
 
 function buildService({
-  chargeResult = { providerTransactionId: "tx-1", status: "PAID" } as ChargeResult,
+  chargeResult = { providerTransactionId: "tx-1", status: "PAID", pixCopyPaste: null } as ChargeResult,
   existing = null as PurchaseRecord | null,
   markPaidResult = true,
   maxChipsPerPurchase = 200_000,
   replayOf = null as PurchaseRecord | null,
+  providerStatus = "PENDING" as PurchaseRecord["status"],
 } = {}) {
   const stored: PurchaseRecord[] = [];
   const entries: NewWalletEntry[] = [];
@@ -40,6 +41,7 @@ function buildService({
         amountCents: input.amountCents,
         status: "PENDING",
         providerTransactionId: null,
+        pixCopyPaste: null,
         createdAt: paidAt,
         paidAt: null,
       };
@@ -50,6 +52,7 @@ function buildService({
       attachCalls.push(input);
     },
     findByProviderTransaction: async () => existing ?? stored[0] ?? null,
+    findOfUser: async ({ userId: owner }) => [existing, ...stored].find((purchase) => purchase?.userId === owner) ?? null,
     getById: async () => existing ?? stored[0],
     markPaid: async (input) => {
       markPaidCalls.push(input);
@@ -72,6 +75,7 @@ function buildService({
       charges.push(input);
       return chargeResult;
     },
+    status: async () => providerStatus,
   };
   const service = new StoreService({
     unitOfWork,
@@ -129,7 +133,7 @@ describe("StoreService", () => {
       const purchase = await service.buy({ userId, quantity: 2_000, idempotencyKey });
 
       assert.deepStrictEqual(charges, [{ purchaseId: "p-1", userId, quantity: 2_000, amountCents: 200_000 }]);
-      assert.deepStrictEqual(attachCalls, [{ purchaseId: "p-1", providerTransactionId: "tx-1" }]);
+      assert.deepStrictEqual(attachCalls, [{ purchaseId: "p-1", providerTransactionId: "tx-1", pixCopyPaste: null }]);
       assert.deepStrictEqual(markPaidCalls, [{ purchaseId: "p-1", paidAt }]);
       assert.deepStrictEqual(entries, [
         {
@@ -147,7 +151,7 @@ describe("StoreService", () => {
     });
 
     it("leaves the purchase pending and credits nothing while the provider has not approved", async () => {
-      const { service, entries } = buildService({ chargeResult: { providerTransactionId: "pix-9", status: "PENDING" } });
+      const { service, entries } = buildService({ chargeResult: { providerTransactionId: "pix-9", status: "PENDING", pixCopyPaste: "PIX-9" } });
 
       const purchase = await service.buy({ userId, quantity: 1_000, idempotencyKey });
 
@@ -174,6 +178,7 @@ describe("StoreService", () => {
         amountCents: 200_000,
         status: "PAID",
         providerTransactionId: "tx-1",
+        pixCopyPaste: null,
         createdAt: paidAt,
         paidAt,
       };
@@ -196,6 +201,7 @@ describe("StoreService", () => {
         amountCents: 200_000,
         status: "PENDING",
         providerTransactionId: null,
+        pixCopyPaste: null,
         createdAt: paidAt,
         paidAt: null,
       };
@@ -204,9 +210,32 @@ describe("StoreService", () => {
       const purchase = await service.buy({ userId, quantity: 2_000, idempotencyKey });
 
       assert.deepStrictEqual(charges, [{ purchaseId: "p-1", userId, quantity: 2_000, amountCents: 200_000 }]);
-      assert.deepStrictEqual(attachCalls, [{ purchaseId: "p-1", providerTransactionId: "tx-1" }]);
+      assert.deepStrictEqual(attachCalls, [{ purchaseId: "p-1", providerTransactionId: "tx-1", pixCopyPaste: null }]);
       assert.strictEqual(entries.length, 1);
       assert.strictEqual(purchase.status, "PAID");
+    });
+
+    it("answers a repeated request of a purchase already charged and still pending with the same pix, without charging again", async () => {
+      const charged: PurchaseRecord = {
+        id: "p-1",
+        userId,
+        quantity: 2_000,
+        amountCents: 200_000,
+        status: "PENDING",
+        providerTransactionId: "pix-9",
+        pixCopyPaste: "PIX-9",
+        createdAt: paidAt,
+        paidAt: null,
+      };
+      const { service, charges, attachCalls } = buildService({ replayOf: charged });
+
+      const purchase = await service.buy({ userId, quantity: 2_000, idempotencyKey });
+
+      assert.deepStrictEqual(charges, []);
+      assert.deepStrictEqual(attachCalls, []);
+      assert.strictEqual(purchase.status, "PENDING");
+      assert.strictEqual(purchase.pix?.copyPaste, "PIX-9");
+      assert.match(purchase.pix?.qrCode ?? "", /^data:image\/png;base64,/);
     });
 
     it("refuses to reuse the key of a purchase for another quantity", async () => {
@@ -217,6 +246,7 @@ describe("StoreService", () => {
         amountCents: 200_000,
         status: "PAID",
         providerTransactionId: "tx-1",
+        pixCopyPaste: null,
         createdAt: paidAt,
         paidAt,
       };
@@ -238,6 +268,45 @@ describe("StoreService", () => {
     });
   });
 
+  describe("getPurchase", () => {
+    const pending: PurchaseRecord = {
+      id: "p-1",
+      userId,
+      quantity: 2_000,
+      amountCents: 200_000,
+      status: "PENDING",
+      providerTransactionId: "pix-9",
+      pixCopyPaste: "PIX-9",
+      createdAt: paidAt,
+      paidAt: null,
+    };
+
+    it("keeps a purchase pending while the provider has not approved", async () => {
+      const { service, entries } = buildService({ existing: pending });
+
+      const purchase = await service.getPurchase({ userId, purchaseId: "p-1" });
+
+      assert.strictEqual(purchase.status, "PENDING");
+      assert.deepStrictEqual(entries, []);
+    });
+
+    it("confirms and credits the purchase once the provider approves", async () => {
+      const { service, entries } = buildService({ existing: pending, providerStatus: "PAID" });
+
+      const purchase = await service.getPurchase({ userId, purchaseId: "p-1" });
+
+      assert.strictEqual(purchase.status, "PAID");
+      assert.strictEqual(purchase.pix, null);
+      assert.strictEqual(entries.length, 1);
+    });
+
+    it("does not show the purchase of another account", async () => {
+      const { service } = buildService({ existing: pending });
+
+      await assert.rejects(service.getPurchase({ userId: "00000000-0000-4000-8000-000000000099", purchaseId: "p-1" }), { code: "purchaseNotFound" });
+    });
+  });
+
   describe("confirmPurchase", () => {
     const paid: PurchaseRecord = {
       id: "p-1",
@@ -246,6 +315,7 @@ describe("StoreService", () => {
       amountCents: 300_000,
       status: "PAID",
       providerTransactionId: "tx-1",
+      pixCopyPaste: null,
       createdAt: paidAt,
       paidAt,
     };

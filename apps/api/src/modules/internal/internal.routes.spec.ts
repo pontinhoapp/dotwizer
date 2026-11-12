@@ -107,12 +107,13 @@ describe("internal routes", () => {
         headers,
         payload: { fullName: "Ana Souza Lima", cpf: "11144477735", birthDate: "1990-05-20", nickname: "Ana" },
       });
-      await testApp.app.inject({
+      const purchase = await testApp.app.inject({
         method: "POST",
         url: "/store/purchases",
         headers: { ...headers, "idempotency-key": randomUUID() },
         payload: { quantity: 5000 },
       });
+      await testApp.services.store.confirmPurchase({ providerTransactionId: `test:${purchase.json().id}` });
 
       const table2 = await post("/internal/players/entry", { accessToken, table: 2 });
       const table3 = await post("/internal/players/entry", { accessToken, table: 3 });

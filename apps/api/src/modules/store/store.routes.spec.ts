@@ -4,6 +4,7 @@ import { createTestApp } from "../../../test/support/test-app.ts";
 import type { TestApp } from "../../../test/support/test-app.ts";
 import { testPrisma } from "../../../test/support/test-database.ts";
 import { HOUSE_ACCOUNT, userAccount } from "../wallet/accounts.ts";
+import { TEST_PAYMENT_DELAY_MS } from "./payment/test-payment-provider.ts";
 
 describe("store routes", () => {
   let testApp: TestApp;
@@ -21,6 +22,20 @@ describe("store routes", () => {
       headers: { ...headers, "idempotency-key": idempotencyKey },
       payload: { quantity },
     });
+  }
+
+  function getPurchase(headers: { authorization: string }, id: string) {
+    return testApp.app.inject({ method: "GET", url: `/store/purchases/${id}`, headers });
+  }
+
+  function payTestPurchases() {
+    testApp.clock.now = new Date(testApp.clock.now.getTime() + TEST_PAYMENT_DELAY_MS);
+  }
+
+  async function buyAndPay(headers: { authorization: string }, quantity: number, idempotencyKey?: string) {
+    const purchase = (await buy(headers, quantity, idempotencyKey)).json();
+    payTestPurchases();
+    return getPurchase(headers, purchase.id);
   }
 
   async function balanceOf(headers: { authorization: string }) {
@@ -69,14 +84,22 @@ describe("store routes", () => {
   });
 
   describe("purchase", () => {
-    it("approves right away with the test provider, charges nothing and credits the chips", async () => {
+    it("leaves the purchase pending with a test pix and credits the chips once the test payment is confirmed", async () => {
       const { userId, headers } = await testApp.signIn();
 
       const response = await buy(headers, 2000);
+      const pending = response.json();
+      const stillPending = (await getPurchase(headers, pending.id)).json();
+      payTestPurchases();
+      const purchase = (await getPurchase(headers, pending.id)).json();
 
-      const purchase = response.json();
       assert.strictEqual(response.statusCode, 201);
+      assert.strictEqual(pending.status, "PENDING");
+      assert.strictEqual(pending.pix.copyPaste, `DOTWIZER-PIX-TESTE-${pending.id}`);
+      assert.match(pending.pix.qrCode, /^data:image\/png;base64,/);
+      assert.strictEqual(stillPending.status, "PENDING");
       assert.strictEqual(purchase.status, "PAID");
+      assert.strictEqual(purchase.pix, null);
       assert.strictEqual(purchase.quantity, 2000);
       assert.strictEqual(purchase.amountCents, 500_000);
       assert.ok(purchase.paidAt);
@@ -89,7 +112,7 @@ describe("store routes", () => {
 
     it("shows the purchase in the statement", async () => {
       const { headers } = await testApp.signIn();
-      await buy(headers, 1000);
+      await buyAndPay(headers, 1000);
 
       const { entries } = (await testApp.app.inject({ method: "GET", url: "/wallet/entries", headers })).json();
 
@@ -180,9 +203,15 @@ describe("store routes", () => {
 
       const first = await buy(headers, 2000, key);
       const second = await buy(headers, 2000, key);
+      await getPurchase(headers, first.json().id);
+      payTestPurchases();
+      await getPurchase(headers, first.json().id);
+      const afterPaid = await buy(headers, 2000, key);
 
       assert.strictEqual(second.statusCode, 201);
       assert.deepStrictEqual(second.json(), first.json());
+      assert.strictEqual(afterPaid.json().id, first.json().id);
+      assert.strictEqual(afterPaid.json().status, "PAID");
       assert.strictEqual(await balanceOf(headers), 2000);
       assert.strictEqual(await testPrisma.purchase.count(), 1);
       assert.strictEqual(await testPrisma.walletEntry.count({ where: { type: "PURCHASE" } }), 1);
@@ -196,6 +225,8 @@ describe("store routes", () => {
 
       assert.deepStrictEqual(responses.map(({ statusCode }) => statusCode), [201, 201, 201]);
       assert.strictEqual(new Set(responses.map((response) => response.json().id)).size, 1);
+      payTestPurchases();
+      await Promise.all([getPurchase(headers, responses[0].json().id), getPurchase(headers, responses[0].json().id)]);
       assert.strictEqual(await balanceOf(headers), 1000);
       assert.strictEqual(await testPrisma.purchase.count(), 1);
     });
@@ -205,10 +236,10 @@ describe("store routes", () => {
       const bia = await testApp.signIn();
       const key = randomUUID();
 
-      const anaPurchase = await buy(ana.headers, 1000, key);
-      const biaPurchase = await buy(bia.headers, 2000, key);
+      const anaPurchase = await buyAndPay(ana.headers, 1000, key);
+      const biaPurchase = await buyAndPay(bia.headers, 2000, key);
 
-      assert.deepStrictEqual([anaPurchase.statusCode, biaPurchase.statusCode], [201, 201]);
+      assert.deepStrictEqual([anaPurchase.statusCode, biaPurchase.statusCode], [200, 200]);
       assert.notStrictEqual(anaPurchase.json().id, biaPurchase.json().id);
       assert.deepStrictEqual([await balanceOf(ana.headers), await balanceOf(bia.headers)], [1000, 2000]);
     });
@@ -216,7 +247,7 @@ describe("store routes", () => {
     it("refuses to reuse a key for another quantity and keeps the first purchase", async () => {
       const { headers } = await testApp.signIn();
       const key = randomUUID();
-      await buy(headers, 1000, key);
+      await buyAndPay(headers, 1000, key);
 
       const response = await buy(headers, 2000, key);
 
@@ -240,7 +271,18 @@ describe("store routes", () => {
 
       const purchase = (await buy(headers, 1000)).json();
 
-      assert.deepStrictEqual(Object.keys(purchase).sort(), ["amountCents", "createdAt", "id", "paidAt", "quantity", "status"]);
+      assert.deepStrictEqual(Object.keys(purchase).sort(), ["amountCents", "createdAt", "id", "paidAt", "pix", "quantity", "status"]);
+    });
+
+    it("shows a purchase only to the account that made it", async () => {
+      const ana = await testApp.signIn();
+      const bia = await testApp.signIn();
+      const purchase = (await buy(ana.headers, 1000)).json();
+
+      const fromBia = await getPurchase(bia.headers, purchase.id);
+      const unknown = await getPurchase(ana.headers, randomUUID());
+
+      assert.deepStrictEqual([fromBia.statusCode, unknown.statusCode], [404, 404]);
     });
   });
 });

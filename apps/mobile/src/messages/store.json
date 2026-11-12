@@ -19,5 +19,11 @@
   "pixKeyType": "Tipo de chave Pix",
   "pixKey": "Chave Pix",
   "withdrawNotice": "O saque vai só para a chave Pix do CPF do seu cadastro.",
-  "registerPixKey": "Cadastrar chave"
+  "registerPixKey": "Cadastrar chave",
+  "pixTitle": "Pague com Pix",
+  "pixQrCode": "QR Code do Pix",
+  "waitingPayment": "Aguardando pagamento",
+  "pixCopyPaste": "Pix Copia e Cola",
+  "copyCode": "Copiar código",
+  "copied": "Código copiado"
 }

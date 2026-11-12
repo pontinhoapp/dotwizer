@@ -1,4 +1,5 @@
 import { ChipStore } from "@/features/store/ChipStore";
+import { PixPayment } from "@/features/store/PixPayment";
 import { usePurchase } from "@/features/store/usePurchase";
 import { useQuote } from "@/features/store/useQuote";
 import { BalanceCard } from "@/features/wallet/BalanceCard";
@@ -21,7 +22,7 @@ export default function Store() {
       </ScreenHeader>
       {quote.error !== "" && <Notice text={quote.error} tone="danger" onRetry={quote.retry} />}
       {purchase.error !== "" && <Notice text={purchase.error} tone="danger" />}
-      <ChipStore quote={quote} purchase={purchase} />
+      {purchase.pix ? <PixPayment pix={purchase.pix} onBack={purchase.clear} /> : <ChipStore quote={quote} purchase={purchase} />}
     </Screen>
   );
 }

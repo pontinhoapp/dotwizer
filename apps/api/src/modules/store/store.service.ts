@@ -1,5 +1,6 @@
 import { CHIP_PURCHASE_MINIMUM, CHIP_PURCHASE_STEP } from "@pontinho/api-contract";
 import type { PurchaseResponse, QuoteResponse } from "@pontinho/api-contract";
+import QRCode from "qrcode";
 import type { UnitOfWork } from "../../common/database/database-client.ts";
 import { ApiError } from "../../common/errors/api-error.ts";
 import type { UsersRepository } from "../users/repository/users.repository.ts";
@@ -33,6 +34,11 @@ interface BuyInput extends QuoteInput {
   idempotencyKey: string;
 }
 
+interface GetPurchaseInput {
+  userId: string;
+  purchaseId: string;
+}
+
 interface ConfirmPurchaseInput {
   providerTransactionId: string;
 }
@@ -42,7 +48,14 @@ interface CreditPurchaseInput {
   purchase: PurchaseRecord;
 }
 
-function toResponse({ purchase }: { purchase: PurchaseRecord }): PurchaseResponse {
+async function pixOf({ purchase }: { purchase: PurchaseRecord }) {
+  if (purchase.status === "PAID" || !purchase.pixCopyPaste) {
+    return null;
+  }
+  return { copyPaste: purchase.pixCopyPaste, qrCode: await QRCode.toDataURL(purchase.pixCopyPaste) };
+}
+
+async function toResponse({ purchase }: { purchase: PurchaseRecord }): Promise<PurchaseResponse> {
   return {
     id: purchase.id,
     quantity: purchase.quantity,
@@ -50,6 +63,7 @@ function toResponse({ purchase }: { purchase: PurchaseRecord }): PurchaseRespons
     status: purchase.status,
     createdAt: purchase.createdAt.toISOString(),
     paidAt: purchase.paidAt?.toISOString() ?? null,
+    pix: await pixOf({ purchase }),
   };
 }
 
@@ -101,16 +115,32 @@ export class StoreService {
     if (purchase.quantity !== quantity) {
       throw new ApiError({ code: "idempotencyKeyReused" });
     }
-    if (purchase.status === "PAID") {
+    if (purchase.status === "PAID" || purchase.providerTransactionId) {
       return toResponse({ purchase });
     }
     const charge = await this.paymentProvider.charge({ purchaseId: purchase.id, userId, quantity, amountCents });
-    const { providerTransactionId, status } = charge;
-    await this.purchasesRepository.attachProviderTransaction({ purchaseId: purchase.id, providerTransactionId });
+    const { providerTransactionId, status, pixCopyPaste } = charge;
+    await this.purchasesRepository.attachProviderTransaction({ purchaseId: purchase.id, providerTransactionId, pixCopyPaste });
     if (status === "PAID") {
       return this.confirmPurchase({ providerTransactionId });
     }
-    return toResponse({ purchase: { ...purchase, providerTransactionId } });
+    return toResponse({ purchase: { ...purchase, providerTransactionId, pixCopyPaste } });
+  }
+
+  async getPurchase({ userId, purchaseId }: GetPurchaseInput): Promise<PurchaseResponse> {
+    const purchase = await this.purchasesRepository.findOfUser({ purchaseId, userId });
+    if (!purchase) {
+      throw new ApiError({ code: "purchaseNotFound" });
+    }
+    if (purchase.status === "PAID" || !purchase.providerTransactionId) {
+      return toResponse({ purchase });
+    }
+    const { providerTransactionId, createdAt } = purchase;
+    const status = await this.paymentProvider.status({ providerTransactionId, createdAt, now: this.now() });
+    if (status === "PAID") {
+      return this.confirmPurchase({ providerTransactionId });
+    }
+    return toResponse({ purchase });
   }
 
   confirmPurchase({ providerTransactionId }: ConfirmPurchaseInput): Promise<PurchaseResponse> {

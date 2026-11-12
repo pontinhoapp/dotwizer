@@ -19,3 +19,7 @@ export function buyChips({ quantity, idempotencyKey }: PurchaseAttempt) {
     headers: { [IDEMPOTENCY_KEY_HEADER]: idempotencyKey },
   });
 }
+
+export function getPurchase(purchaseId: string) {
+  return request<PurchaseResponse>(`/store/purchases/${purchaseId}`);
+}

@@ -49,5 +49,16 @@ export const purchaseResponseSchema = z.object({
   status: purchaseStatusSchema,
   createdAt: isoDateTimeSchema,
   paidAt: isoDateTimeSchema.nullable().describe("Quando o pagamento foi confirmado, ou nulo se ainda estiver pendente."),
+  pix: z
+    .object({
+      copyPaste: z.string().describe("Pix Copia e Cola."),
+      qrCode: z.string().describe("Imagem do QR Code em data URL (PNG)."),
+    })
+    .nullable()
+    .describe("Dados para pagar enquanto a compra está pendente; nulo depois de paga."),
+});
+
+export const purchaseParamsSchema = z.object({
+  id: z.uuid().describe("Identificador da compra."),
 });
 export type PurchaseResponse = z.infer<typeof purchaseResponseSchema>;

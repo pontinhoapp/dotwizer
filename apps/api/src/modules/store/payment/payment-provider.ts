@@ -10,9 +10,17 @@ export interface ChargeInput {
 export interface ChargeResult {
   providerTransactionId: string;
   status: PurchaseStatus;
+  pixCopyPaste: string | null;
+}
+
+export interface StatusInput {
+  providerTransactionId: string;
+  createdAt: Date;
+  now: Date;
 }
 
 export interface PaymentProvider {
   readonly name: PaymentProviderName;
   charge(input: ChargeInput): Promise<ChargeResult>;
+  status(input: StatusInput): Promise<PurchaseStatus>;
 }

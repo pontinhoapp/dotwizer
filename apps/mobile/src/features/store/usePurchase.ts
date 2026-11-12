@@ -1,10 +1,12 @@
 import { useRef } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { randomUUID } from "expo-crypto";
 import { ApiError } from "@/shared/api/client";
-import { buyChips } from "@/shared/api/store";
+import { buyChips, getPurchase } from "@/shared/api/store";
 import { walletQueryOptions } from "@/shared/api/wallet";
 import errors from "@/messages/errors.json";
+
+const PAYMENT_CHECK_MS = 2000;
 
 type Attempt = { quantity: number; idempotencyKey: string };
 
@@ -36,11 +38,26 @@ export function usePurchase() {
     },
     onSettled: () => queryClient.invalidateQueries(walletQueryOptions()),
   });
+  const pendingId = mutation.data?.status === "PENDING" ? mutation.data.id : undefined;
+  const payment = useQuery({
+    queryKey: ["store", "purchase", pendingId],
+    queryFn: async () => {
+      const purchase = await getPurchase(pendingId ?? "");
+      if (purchase.status === "PAID") {
+        queryClient.invalidateQueries(walletQueryOptions());
+      }
+      return purchase;
+    },
+    enabled: pendingId !== undefined,
+    refetchInterval: (query) => (query.state.data?.status === "PAID" ? false : PAYMENT_CHECK_MS),
+  });
+  const current = payment.data ?? mutation.data;
 
   return {
     buy: (quantity: number) => mutation.mutate(quantity),
     pending: mutation.isPending,
-    purchasedQuantity: mutation.data?.status === "PAID" ? mutation.data.quantity : undefined,
+    pix: current?.status === "PENDING" ? current.pix : null,
+    purchasedQuantity: current?.status === "PAID" ? current.quantity : undefined,
     clear: () => mutation.reset(),
     error: purchaseError(mutation.error),
   };

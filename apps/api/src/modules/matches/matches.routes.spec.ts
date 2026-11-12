@@ -22,12 +22,13 @@ describe("matches routes", () => {
         headers,
         payload: { fullName: `Jogador ${index + 1}`, cpf: cpfs[index], birthDate: "1990-05-20", nickname: `Jogador ${index + 1}` },
       });
-      await testApp.app.inject({
+      const purchase = await testApp.app.inject({
         method: "POST",
         url: "/store/purchases",
         headers: { ...headers, "idempotency-key": randomUUID() },
         payload: { quantity: 5000 },
       });
+      await testApp.services.store.confirmPurchase({ providerTransactionId: `test:${purchase.json().id}` });
     }
     const [ana, bia, caio] = players.map(({ userId }) => userId);
     const matchId = (

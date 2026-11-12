@@ -3,6 +3,7 @@ import {
   buyBodySchema,
   buyHeadersSchema,
   IDEMPOTENCY_KEY_HEADER,
+  purchaseParamsSchema,
   purchaseResponseSchema,
   quoteQuerySchema,
   quoteResponseSchema,
@@ -22,7 +23,7 @@ const quoteSchema = {
 const buySchema = {
   summary: "Comprar fichas",
   description:
-    "Cria a compra e chama o provedor de pagamento. Com o provedor de teste a compra é aprovada na hora e nada é cobrado. Repetir a mesma `Idempotency-Key` devolve a mesma compra.",
+    "Cria a compra e chama o provedor de pagamento. Com o provedor de teste a compra fica pendente, com um Pix Copia e Cola de teste, e nada é cobrado. Repetir a mesma `Idempotency-Key` devolve a mesma compra, sem cobrar de novo.",
   tags: [TAGS.store],
   security: APP_SECURITY,
   headers: buyHeadersSchema,
@@ -33,9 +34,21 @@ const buySchema = {
   },
 };
 
+const getPurchaseSchema = {
+  summary: "Consultar uma compra",
+  description: "Devolve a compra da própria conta e confere o pagamento no provedor enquanto ela está pendente. Com o provedor de teste, a compra é paga 5 s depois de criada.",
+  tags: [TAGS.store],
+  security: APP_SECURITY,
+  params: purchaseParamsSchema,
+  response: { 200: purchaseResponseSchema, ...appErrors({ codes: ["validationFailed", "purchaseNotFound"] }) },
+};
+
 export function storeRoutes({ service }: { service: StoreService }): FastifyPluginAsyncZod {
   return async (app) => {
     app.get("/store/quote", { schema: quoteSchema }, (request) => service.quote(request.query));
+    app.get("/store/purchases/:id", { schema: getPurchaseSchema }, (request) =>
+      service.getPurchase({ userId: request.auth.userId, purchaseId: request.params.id }),
+    );
     app.post("/store/purchases", { schema: buySchema }, async (request, reply) => {
       reply.code(201);
       return service.buy({

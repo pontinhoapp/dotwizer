@@ -9,6 +9,7 @@ const purchaseSelect = {
   amountCents: true,
   status: true,
   providerTransactionId: true,
+  pixCopyPaste: true,
   createdAt: true,
   paidAt: true,
 } satisfies Prisma.PurchaseSelect;
@@ -26,6 +27,12 @@ interface CreateOnceInput {
 interface AttachProviderTransactionInput {
   purchaseId: string;
   providerTransactionId: string;
+  pixCopyPaste: string | null;
+}
+
+interface FindOfUserInput {
+  purchaseId: string;
+  userId: string;
 }
 
 interface FindByProviderTransactionInput {
@@ -53,8 +60,12 @@ export class PurchasesRepository {
     });
   }
 
-  async attachProviderTransaction({ purchaseId, providerTransactionId }: AttachProviderTransactionInput): Promise<void> {
-    await this.client.purchase.update({ where: { id: purchaseId }, data: { providerTransactionId } });
+  async attachProviderTransaction({ purchaseId, providerTransactionId, pixCopyPaste }: AttachProviderTransactionInput): Promise<void> {
+    await this.client.purchase.update({ where: { id: purchaseId }, data: { providerTransactionId, pixCopyPaste } });
+  }
+
+  findOfUser({ purchaseId, userId }: FindOfUserInput): Promise<PurchaseRecord | null> {
+    return this.client.purchase.findFirst({ where: { id: purchaseId, userId }, select: purchaseSelect });
   }
 
   getById({ purchaseId }: { purchaseId: string }): Promise<PurchaseRecord> {

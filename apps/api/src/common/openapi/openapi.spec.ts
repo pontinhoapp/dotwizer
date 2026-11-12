@@ -27,6 +27,7 @@ const ROUTES = [
   "POST /wallet/daily-bonus",
   "GET /store/quote",
   "POST /store/purchases",
+  "GET /store/purchases/{id}",
   "GET /matches/{matchId}",
   "GET /internal/ping",
   "POST /internal/players/entry",
