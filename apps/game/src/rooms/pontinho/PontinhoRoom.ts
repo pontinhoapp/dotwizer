@@ -12,6 +12,7 @@ import {
   MAX_PLAYERS,
   meldMessageSchema,
   MIN_PLAYERS,
+  PixTransferState,
   Player,
   PontinhoState,
   PRACTICE_TABLE,
@@ -23,7 +24,7 @@ import {
 } from "@pontinho/protocol";
 import { describeFailure, type GameApi } from "../../gameApi/GameApi.js";
 import { ChipsMatch, NO_WINNER, type ChipsFinance, type ChipsSeat, type MatchResult } from "./ChipsMatch.js";
-import { FriendsChips } from "./FriendsChips.js";
+import { FriendsChips, type PlayerPixTransfer } from "./FriendsChips.js";
 import { newFriendsCode } from "./friendsCode.js";
 import { mirrorGame } from "./mirrorGame.js";
 import { openMatches } from "./openMatches.js";
@@ -89,7 +90,7 @@ export abstract class PontinhoRoom extends Room<{ state: PontinhoState; client: 
   async onCreate(options: unknown) {
     const parsed = createOptionsSchema.parse(options);
     if ("friends" in parsed) {
-      await this.openToFriends(parsed.seats, parsed.lifeJoker, parsed.table);
+      await this.openToFriends(parsed.seats, parsed.lifeJoker, parsed.table, parsed.centsPerPoint ?? 0);
       return;
     }
     this.withBots = parsed.bots;
@@ -99,7 +100,7 @@ export abstract class PontinhoRoom extends Room<{ state: PontinhoState; client: 
     this.state.lifeJoker = parsed.bots && parsed.lifeJoker;
   }
 
-  private async openToFriends(seats: number, lifeJoker: boolean, table: number) {
+  private async openToFriends(seats: number, lifeJoker: boolean, table: number, centsPerPoint: number) {
     this.roomId = await newFriendsCode();
     await this.setPrivate();
     this.maxClients = seats;
@@ -107,6 +108,7 @@ export abstract class PontinhoRoom extends Room<{ state: PontinhoState; client: 
     this.state.lifeJoker = lifeJoker;
     this.state.table = table;
     this.state.friends = true;
+    this.state.centsPerPoint = centsPerPoint;
   }
 
   onUncaughtException(error: Error, methodName: string) {
@@ -120,6 +122,12 @@ export abstract class PontinhoRoom extends Room<{ state: PontinhoState; client: 
     const walletTable = this.state.friends ? PRACTICE_TABLE : this.state.table;
     if (auth.table !== walletTable) {
       throw refuse("invalidOptions");
+    }
+    if (!auth.pixSettlement) {
+      this.state.centsPerPoint = 0;
+    }
+    if (this.state.centsPerPoint > 0 && !auth.pixKeyRegistered) {
+      throw refuse("pixKeyMissing");
     }
     this.addPlayer(client.sessionId, auth.name, auth.photoUrl, false);
     this.userIds.set(client.sessionId, auth.id);
@@ -377,7 +385,7 @@ export abstract class PontinhoRoom extends Room<{ state: PontinhoState; client: 
 
   private createChips(seats: ChipsSeat[]) {
     if (this.state.friends) {
-      return new FriendsChips({ api: this.gameApi, table: this.state.table, seats });
+      return new FriendsChips({ api: this.gameApi, table: this.state.table, seats, centsPerPoint: this.state.centsPerPoint || null, onPixTransfers: (transfers) => this.mirrorPixTransfers(transfers) });
     }
     return new ChipsMatch({ api: this.gameApi, roomId: this.roomId, table: this.state.table, seats });
   }
@@ -450,6 +458,10 @@ export abstract class PontinhoRoom extends Room<{ state: PontinhoState; client: 
 
   private finishChips(result: MatchResult) {
     return this.chips?.finish(result).catch((error) => this.logFailure("Falha ao encerrar a partida de fichas", error));
+  }
+
+  private mirrorPixTransfers(transfers: PlayerPixTransfer[]) {
+    this.state.pixTransfers.push(...transfers.map((transfer) => new PixTransferState(transfer)));
   }
 
   private mirrorFinances(finances: ChipsFinance[]) {

@@ -63,7 +63,7 @@ describe("PontinhoRoom with friends", () => {
   });
 
   it("settles the rounds among the players only, and records the result once when the match ends", async () => {
-    const { room, clients } = await friendsRoom(["Lucas", "Ana", "Bruno", "Carla"]);
+    const { room, clients } = await friendsRoom(["Lucas", "Ana", "Bruno", "Carla"], { ...FRIENDS, lifeJoker: false });
     await flush();
     const current = clients.find((client) => client.sessionId === room.state.currentTurn) ?? clients[0];
     const others = clients.filter((client) => client !== current);
@@ -83,6 +83,7 @@ describe("PontinhoRoom with friends", () => {
     assert.strictEqual(api.friendsMatches.length, 1);
     const [recorded] = api.friendsMatches;
     assert.strictEqual(recorded.table, 3);
+    assert.strictEqual(recorded.centsPerPoint, null);
     assert.strictEqual(recorded.winnerId, api.userIdOf(playerOf(room, current.sessionId).name));
     assert.deepStrictEqual(
       recorded.players.map(({ result }) => result),
@@ -92,6 +93,67 @@ describe("PontinhoRoom with friends", () => {
     await room.disconnect();
     await flush();
     assert.strictEqual(api.friendsMatches.length, 1);
+  });
+
+  describe("with Pix settlement", () => {
+    const PIX_ROOM = { ...FRIENDS, lifeJoker: false, centsPerPoint: 10 };
+    const WITH_PIX = { pixSettlement: true, pixKeyRegistered: true };
+
+    async function pixRoom(names: string[]) {
+      const room = await createRoom(PIX_ROOM);
+      const clients = [];
+      for (const name of names) {
+        clients.push(await connectWith(room, api.addAccount(name, WITH_PIX), { code: room.roomId }));
+      }
+      return { room, clients };
+    }
+
+    it("records the cents per point and shows who pays whom, with each Pix code", async () => {
+      const { room, clients } = await pixRoom(["Lucas", "Ana", "Bruno", "Carla"]);
+      await flush();
+      const current = clients.find((client) => client.sessionId === room.state.currentTurn) ?? clients[0];
+      const others = clients.filter((client) => client !== current);
+      editGame(room, (game) => {
+        const hands = others.reduce((edited, other) => withPoints(withHand(edited, other.sessionId, ["Q-hearts-1"]), other.sessionId, 95), withHand(game, current.sessionId, ["K-spades-1"]));
+        return { ...hands, hasDrawn: true };
+      });
+
+      current.send("discard", "K-spades-1");
+      await room.waitForMessage("discard");
+      await flush();
+
+      assert.strictEqual(room.state.centsPerPoint, 10);
+      assert.strictEqual(api.friendsMatches[0].centsPerPoint, 10);
+      assert.deepStrictEqual(
+        room.state.pixTransfers.map(({ from, to, amountCents }) => ({ from, to, amountCents })),
+        others.map((other) => ({ from: other.sessionId, to: current.sessionId, amountCents: 100 })),
+      );
+    });
+
+    it("drops the Pix when someone without the flag comes in", async () => {
+      const { room } = await pixRoom(["Lucas"]);
+
+      await connect(room, "Ana", { code: room.roomId });
+
+      assert.strictEqual(room.state.centsPerPoint, 0);
+    });
+
+    it("refuses who has the flag but no Pix key, and keeps the Pix", async () => {
+      const { room } = await pixRoom(["Lucas"]);
+
+      await assert.rejects(
+        connectWith(room, api.addAccount("Ana", { pixSettlement: true }), { code: room.roomId }),
+        (error: { message: string }) => error.message === JOIN_REFUSALS.pixKeyMissing.message,
+      );
+      assert.strictEqual(room.state.centsPerPoint, 10);
+    });
+
+    it("records a room without Pix with no cents per point and no transfers", async () => {
+      const { room } = await friendsRoom(["Lucas"]);
+
+      assert.strictEqual(room.state.centsPerPoint, 0);
+      assert.strictEqual(room.state.pixTransfers.length, 0);
+    });
   });
 
   it("starts only when the owner asks, with at least 3 seated", async () => {

@@ -4,6 +4,7 @@ interface CreateInput {
   id: string;
   tableId: number;
   pointValue: number;
+  centsPerPoint: number | null;
   winnerId: string | null;
   finishedAt: Date;
   players: { userId: string; result: number }[];

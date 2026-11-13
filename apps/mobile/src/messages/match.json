@@ -92,5 +92,12 @@
   "shareMessage": "Jogue DotWizer comigo: {link}",
   "linkCopied": "Link copiado",
   "start": "Começar",
-  "waitingOwner": "Aguardando o dono começar"
+  "waitingOwner": "Aguardando o dono começar",
+  "pixPerPoint": "Acerto por Pix: {value} por ponto",
+  "pixTitle": "Acerto por Pix",
+  "pixPays": "{from} paga {value} a {to}",
+  "pixQrCode": "QR Code do Pix",
+  "pixCopy": "Copiar Pix",
+  "pixCopied": "Pix copiado",
+  "pixNotice": "Pague pelo app do seu banco. O DotWizer não recebe nem confere os pagamentos."
 }

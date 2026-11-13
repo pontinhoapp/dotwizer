@@ -71,7 +71,7 @@ export function TrainingSetup({ connecting, error, onConfirm, onEnterWithCode }:
         connecting={connecting}
         error={error}
         onClose={() => setChoosingTable(false)}
-        onCreate={(table) => onConfirm({ friends: true, seats, lifeJoker, table, cardStyle })}
+        onCreate={(table, centsPerPoint) => onConfirm({ friends: true, seats, lifeJoker, table, centsPerPoint, cardStyle })}
       />
     </>
   );
