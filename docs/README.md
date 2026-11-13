@@ -2,6 +2,8 @@
 
 O que a API e o servidor do jogo esperam em cada caso de uso, e o que fazem quando algo dá errado. Há dois tipos de documento, e um não substitui o outro.
 
+Para a visão geral: [regras de negócio](business-rules.md), com as regras do jogo, do cadastro, das partidas, das fichas e as políticas, e [stack](stack.md), com o que roda em cada parte e as versões.
+
 ## OpenAPI (referência de cada rota)
 
 Gerado dos schemas zod do `packages/api-contract`, então não sai do compasso com o código.
