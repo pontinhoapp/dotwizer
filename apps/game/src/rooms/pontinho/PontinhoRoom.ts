@@ -22,7 +22,9 @@ import {
   type ServerMessages,
 } from "@pontinho/protocol";
 import { describeFailure, type GameApi } from "../../gameApi/GameApi.js";
-import { ChipsMatch, NO_WINNER, type ChipsFinance, type MatchResult } from "./ChipsMatch.js";
+import { ChipsMatch, NO_WINNER, type ChipsFinance, type ChipsSeat, type MatchResult } from "./ChipsMatch.js";
+import { FriendsChips } from "./FriendsChips.js";
+import { newFriendsCode } from "./friendsCode.js";
 import { mirrorGame } from "./mirrorGame.js";
 import { openMatches } from "./openMatches.js";
 import { createPlayerAuthenticator, refuse, type PlayerAuth } from "./playerAuth.js";
@@ -65,7 +67,7 @@ export abstract class PontinhoRoom extends Room<{ state: PontinhoState; client: 
   private returnTimer?: Delayed;
   private countdownTimer?: Delayed;
   private withBots = false;
-  private chips?: ChipsMatch;
+  private chips?: ChipsMatch | FriendsChips;
   private breakElapsed = false;
   private registering = false;
   private aborted = false;
@@ -81,15 +83,30 @@ export abstract class PontinhoRoom extends Room<{ state: PontinhoState; client: 
     discard: validate(discardMessageSchema, (client: Client, cardId) => this.act(client, { type: "discard", cardId })),
     goOut: (client: Client) => this.act(client, { type: "goOut" }),
     chooseReturn: validate(chooseReturnMessageSchema, (client: Client, { back }) => this.act(client, { type: "chooseReturn", back })),
+    start: (client: Client) => this.startByOwner(client),
   } satisfies Record<keyof ClientMessages, unknown>;
 
-  onCreate(options: unknown) {
+  async onCreate(options: unknown) {
     const parsed = createOptionsSchema.parse(options);
+    if ("friends" in parsed) {
+      await this.openToFriends(parsed.seats, parsed.lifeJoker, parsed.table);
+      return;
+    }
     this.withBots = parsed.bots;
     this.maxClients = parsed.bots ? 1 : MAX_PLAYERS;
     this.state.seats = parsed.bots ? parsed.seats : MAX_PLAYERS;
     this.state.table = parsed.bots ? PRACTICE_TABLE : parsed.table;
     this.state.lifeJoker = parsed.bots && parsed.lifeJoker;
+  }
+
+  private async openToFriends(seats: number, lifeJoker: boolean, table: number) {
+    this.roomId = await newFriendsCode();
+    await this.setPrivate();
+    this.maxClients = seats;
+    this.state.seats = seats;
+    this.state.lifeJoker = lifeJoker;
+    this.state.table = table;
+    this.state.friends = true;
   }
 
   onUncaughtException(error: Error, methodName: string) {
@@ -100,7 +117,8 @@ export abstract class PontinhoRoom extends Room<{ state: PontinhoState; client: 
   }
 
   onJoin(client: Client, _options: unknown, auth: PlayerAuth) {
-    if (auth.table !== this.state.table) {
+    const walletTable = this.state.friends ? PRACTICE_TABLE : this.state.table;
+    if (auth.table !== walletTable) {
       throw refuse("invalidOptions");
     }
     this.addPlayer(client.sessionId, auth.name, auth.photoUrl, false);
@@ -314,12 +332,19 @@ export abstract class PontinhoRoom extends Room<{ state: PontinhoState; client: 
   }
 
   private startCountdownWhenEnoughSeated() {
-    if (this.withBots || this.state.players.size < MIN_PLAYERS || this.state.countdownDuration > 0) {
+    if (this.withBots || this.state.friends || this.state.players.size < MIN_PLAYERS || this.state.countdownDuration > 0) {
       return;
     }
     this.state.countdownNumber++;
     this.state.countdownDuration = COUNTDOWN_MS;
     this.countdownTimer = this.clock.setTimeout(() => this.startMatch(), COUNTDOWN_MS);
+  }
+
+  private startByOwner(client: Client) {
+    if (!this.state.friends || this.game || this.state.order.at(0) !== client.sessionId || this.state.players.size < MIN_PLAYERS) {
+      return;
+    }
+    this.startMatch();
   }
 
   private stopCountdown() {
@@ -339,7 +364,7 @@ export abstract class PontinhoRoom extends Room<{ state: PontinhoState; client: 
       return;
     }
     const seats = [...this.userIds].map(([playerId, userId]) => ({ playerId, userId }));
-    this.chips = new ChipsMatch({ api: this.gameApi, roomId: this.roomId, table: this.state.table, seats });
+    this.chips = this.createChips(seats);
     this.chips
       .open()
       .then((opened) => {
@@ -348,6 +373,13 @@ export abstract class PontinhoRoom extends Room<{ state: PontinhoState; client: 
         this.mirrorFinances(opened.finances);
       })
       .catch((error) => this.abortMatch(error));
+  }
+
+  private createChips(seats: ChipsSeat[]) {
+    if (this.state.friends) {
+      return new FriendsChips({ api: this.gameApi, table: this.state.table, seats });
+    }
+    return new ChipsMatch({ api: this.gameApi, roomId: this.roomId, table: this.state.table, seats });
   }
 
   private settleChips(winnerId: string) {

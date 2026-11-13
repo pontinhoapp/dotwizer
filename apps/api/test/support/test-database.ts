@@ -30,6 +30,6 @@ export function migrateTestDatabase(): void {
 
 export async function resetDatabase(): Promise<void> {
   await testPrisma.$executeRawUnsafe(
-    "TRUNCATE TABLE wallet_entries, match_players, matches, purchases, users RESTART IDENTITY CASCADE",
+    "TRUNCATE TABLE wallet_entries, match_players, matches, friends_match_players, friends_matches, purchases, users RESTART IDENTITY CASCADE",
   );
 }

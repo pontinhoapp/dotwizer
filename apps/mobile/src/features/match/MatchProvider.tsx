@@ -2,7 +2,7 @@ import { createContext, use, useEffect, useEffectEvent, useRef, useState, type R
 import { AppState } from "react-native";
 import { Asset } from "expo-asset";
 import { Client, CloseCode, ErrorCode, MatchMakeError, type Room } from "@colyseus/sdk";
-import { CLOSE_CODES, ROOM_NAME, type CreateOptions, type PontinhoState } from "@pontinho/protocol";
+import { CLOSE_CODES, ROOM_NAME, type EntryOptions, type PontinhoState } from "@pontinho/protocol";
 import { getAccessToken } from "@/shared/api/client";
 import { fetchWithTimeout } from "@/shared/api/fetchWithTimeout";
 import { profileQueryOptions } from "@/shared/api/profile";
@@ -17,7 +17,7 @@ import { toJoinFailure } from "./joinFailure";
 import { findStoredSeatKey, forgetSeatKey, keepSeatKey, type SeatKey } from "./seatKey";
 import { hasChips } from "./state";
 
-export type JoinRequest = CreateOptions & { cardStyle: CardStyleName };
+export type JoinRequest = EntryOptions & { cardStyle: CardStyleName };
 
 type MatchSession = {
   room?: Room<PontinhoState>;
@@ -48,6 +48,16 @@ const MatchContext = createContext<MatchSession | undefined>(undefined);
 
 function loadDeck(cardStyle: CardStyleName) {
   return Asset.loadAsync(Object.values(DECK_IMAGES[cardStyle]));
+}
+
+function matchMake(options: EntryOptions) {
+  if ("code" in options) {
+    return client.joinById<PontinhoState>(options.code, options);
+  }
+  if ("friends" in options) {
+    return client.create<PontinhoState>(ROOM_NAME, options);
+  }
+  return client.joinOrCreate<PontinhoState>(ROOM_NAME, options);
 }
 
 function seatIsGone(reason: unknown) {
@@ -198,7 +208,7 @@ export function MatchProvider({ children }: { children: ReactNode }) {
       connect: async () => {
         await loadDeck(chosenCardStyle);
         client.auth.token = await getAccessToken();
-        return client.joinOrCreate<PontinhoState>(ROOM_NAME, options);
+        return matchMake(options);
       },
     });
   }

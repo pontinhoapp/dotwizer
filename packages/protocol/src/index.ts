@@ -60,6 +60,7 @@ export const PontinhoState = schema({
   discardTop: t.ref(CardState).optional(),
   stockCount: t.uint8().default(0),
   lifeJoker: t.boolean().default(false),
+  friends: t.boolean().default(false),
   flipped: t.ref(CardState).optional(),
   melds: t.array(MeldState),
 });
@@ -83,10 +84,17 @@ const tableSchema = z.number().int().refine((table) => CHIP_TABLES.some(({ id })
 
 const seatsSchema = z.number().int().min(MIN_PLAYERS).max(TRAINING_MAX_PLAYERS);
 
-export const createOptionsSchema = z.discriminatedUnion("bots", [
+export const FRIENDS_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+export const FRIENDS_CODE_LENGTH = 6;
+export const friendsCodeSchema = z.string().length(FRIENDS_CODE_LENGTH).regex(new RegExp(`^[${FRIENDS_CODE_ALPHABET}]+$`));
+
+export const createOptionsSchema = z.union([
   z.object({ bots: z.literal(true), seats: seatsSchema, lifeJoker: z.boolean().default(false), table: tableSchema.optional() }),
   z.object({ bots: z.literal(false), table: tableSchema }),
+  z.object({ friends: z.literal(true), seats: seatsSchema, lifeJoker: z.boolean().default(false), table: tableSchema }),
 ]);
+
+export const entryOptionsSchema = z.union([createOptionsSchema, z.object({ code: friendsCodeSchema })]);
 
 export const discardMessageSchema = cardIdSchema;
 export const chooseReturnMessageSchema = z.object({ back: z.boolean() });
@@ -99,6 +107,7 @@ export const layOffMessageSchema = z.object({
 });
 
 export type CreateOptions = z.input<typeof createOptionsSchema>;
+export type EntryOptions = z.input<typeof entryOptionsSchema>;
 
 export type ClientMessages = {
   draw: undefined;
@@ -108,6 +117,7 @@ export type ClientMessages = {
   discard: z.infer<typeof discardMessageSchema>;
   goOut: undefined;
   chooseReturn: z.infer<typeof chooseReturnMessageSchema>;
+  start: undefined;
 };
 
 export type MoveEvent = { kind: "draw" | "toTable" | "discard"; playerId: string; cardIds: string[] };

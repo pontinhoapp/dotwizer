@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MIN_PLAYERS, ONLINE_MAX_PLAYERS } from "@pontinho/rules";
+import { MIN_PLAYERS, ONLINE_MAX_PLAYERS, TRAINING_MAX_PLAYERS } from "@pontinho/rules";
 import { chipsSchema, isoDateTimeSchema, matchIdSchema, userIdSchema } from "./common.ts";
 
 const tableSchema = z.number().int().positive().describe("Número da mesa (1 a 7).");
@@ -104,3 +104,27 @@ export const eliminatePlayerResponseSchema = z.object({
   eliminatedAt: isoDateTimeSchema.describe("Quando a eliminação foi registrada. Repetir devolve a primeira."),
 });
 export type EliminatePlayerResponse = z.infer<typeof eliminatePlayerResponseSchema>;
+
+export const recordFriendsMatchBodySchema = z
+  .strictObject({
+    table: tableSchema.describe("Mesa escolhida por quem criou a sala: define o valor do ponto e as fichas do começo."),
+    winnerId: userIdSchema.nullable().describe("Vencedor, ou nulo quando ninguém venceu."),
+    players: z
+      .array(z.strictObject({ userId: userIdSchema, result: chipsSchema.describe("Fichas da partida ganhas (positivo) ou perdidas (negativo).") }))
+      .min(MIN_PLAYERS)
+      .max(TRAINING_MAX_PLAYERS)
+      .describe("Contas da partida com amigos, sem repetir."),
+  })
+  .refine(
+    ({ winnerId, players }) => {
+      const ids = players.map(({ userId }) => userId);
+      return new Set(ids).size === ids.length && (winnerId === null || ids.includes(winnerId));
+    },
+    "players must be unique and must include the winner",
+  );
+export type RecordFriendsMatchBody = z.infer<typeof recordFriendsMatchBodySchema>;
+
+export const recordFriendsMatchResponseSchema = z.object({
+  matchId: matchIdSchema,
+});
+export type RecordFriendsMatchResponse = z.infer<typeof recordFriendsMatchResponseSchema>;

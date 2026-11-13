@@ -1,5 +1,6 @@
 import type { PrismaClient } from "./generated/prisma/client.ts";
 import type { DatabaseClient, UnitOfWork } from "./common/database/database-client.ts";
+import { FriendsMatchesRepository } from "./modules/friends-matches/repository/friends-matches.repository.ts";
 import { MatchesRepository } from "./modules/matches/repository/matches.repository.ts";
 import { PurchasesRepository } from "./modules/store/repository/purchases.repository.ts";
 import { UsersRepository } from "./modules/users/repository/users.repository.ts";
@@ -10,6 +11,7 @@ export interface Repositories {
   wallet: WalletRepository;
   purchases: PurchasesRepository;
   matches: MatchesRepository;
+  friendsMatches: FriendsMatchesRepository;
 }
 
 export function buildRepositories({ client }: { client: DatabaseClient }): Repositories {
@@ -18,6 +20,7 @@ export function buildRepositories({ client }: { client: DatabaseClient }): Repos
     wallet: new WalletRepository({ client }),
     purchases: new PurchasesRepository({ client }),
     matches: new MatchesRepository({ client }),
+    friendsMatches: new FriendsMatchesRepository({ client }),
   };
 }
 

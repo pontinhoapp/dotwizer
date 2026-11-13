@@ -86,5 +86,11 @@
     "flipped": "Carta virada: {card}, fora do jogo",
     "lifeJokers": "Coringa de vida: {cards}",
     "turnOrder": "Ordem da vez"
-  }
+  },
+  "friendsCode": "Código: {code}",
+  "shareLink": "Compartilhar link",
+  "shareMessage": "Jogue DotWizer comigo: {link}",
+  "linkCopied": "Link copiado",
+  "start": "Começar",
+  "waitingOwner": "Aguardando o dono começar"
 }

@@ -1,4 +1,4 @@
-import { Redirect } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { OpenMatchPrompt } from "@/features/lobby/OpenMatchPrompt";
 import { TrainingSetup } from "@/features/lobby/TrainingSetup";
 import { useMatch } from "@/features/match/MatchProvider";
@@ -25,7 +25,7 @@ export default function Training() {
       {openMatch ? (
         <OpenMatchPrompt canResume={canResume} connecting={connecting} error={error} onResume={resume} onBack={goBack} />
       ) : (
-        <TrainingSetup connecting={connecting} error={error} onConfirm={join} />
+        <TrainingSetup connecting={connecting} error={error} onConfirm={join} onEnterWithCode={() => router.push("/amigos")} />
       )}
     </Screen>
   );

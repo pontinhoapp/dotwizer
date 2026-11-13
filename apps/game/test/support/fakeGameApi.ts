@@ -1,7 +1,7 @@
-import type { EliminatePlayerResponse, MatchHistoryResponse, PingResponse, PlayerEntryBody, PlayerEntryResponse, RegisterRoundResponse, StartMatchBody, StartMatchResponse } from "@pontinho/api-contract";
+import type { EliminatePlayerResponse, MatchHistoryResponse, PingResponse, PlayerEntryBody, PlayerEntryResponse, RecordFriendsMatchResponse, RegisterRoundResponse, StartMatchBody, StartMatchResponse } from "@pontinho/api-contract";
 import { CHIP_TABLES, settleRound, type MatchFinance } from "@pontinho/rules";
 import { API_ERROR_STATUS } from "@pontinho/api-contract";
-import { GameApiError, type EliminatePlayerInput, type FinishMatchInput, type GameApi, type GameApiErrorCode, type RegisterRoundInput } from "../../src/gameApi/GameApi.js";
+import { GameApiError, type EliminatePlayerInput, type FinishMatchInput, type GameApi, type GameApiErrorCode, type RecordFriendsMatchInput, type RegisterRoundInput } from "../../src/gameApi/GameApi.js";
 
 type Account = { token: string; userId: string; name: string | null; photoUrl: string | null; profileComplete: boolean; balance: number; openMatchId: string | null };
 
@@ -25,6 +25,7 @@ export class FakeGameApi implements GameApi {
   registeredRounds: RegisterRoundInput[] = [];
   finishedMatches: FinishMatchInput[] = [];
   eliminations: EliminatePlayerInput[] = [];
+  friendsMatches: RecordFriendsMatchInput[] = [];
 
   private accounts = new Map<string, Account>();
   private matches = new Map<string, FakeMatch>();
@@ -38,6 +39,7 @@ export class FakeGameApi implements GameApi {
     this.registeredRounds = [];
     this.finishedMatches = [];
     this.eliminations = [];
+    this.friendsMatches = [];
     this.accounts.clear();
     this.matches.clear();
     this.failures.clear();
@@ -70,7 +72,7 @@ export class FakeGameApi implements GameApi {
     return `user-${name}`;
   }
 
-  failNext(call: "ping" | "playerEntry" | "startMatch" | "registerRound" | "finishMatch" | "eliminatePlayer", times = 1, code: GameApiErrorCode = "internalError") {
+  failNext(call: "ping" | "playerEntry" | "startMatch" | "registerRound" | "finishMatch" | "eliminatePlayer" | "recordFriendsMatch", times = 1, code: GameApiErrorCode = "internalError") {
     this.failures.set(call, { times, code });
   }
 
@@ -189,6 +191,12 @@ export class FakeGameApi implements GameApi {
     this.eliminations.push(input);
     this.consumeFailure("eliminatePlayer");
     return { matchId: input.matchId, userId: input.userId, eliminatedAt: new Date(0).toISOString() };
+  }
+
+  async recordFriendsMatch(input: RecordFriendsMatchInput): Promise<RecordFriendsMatchResponse> {
+    this.friendsMatches.push(input);
+    this.consumeFailure("recordFriendsMatch");
+    return { matchId: input.matchId };
   }
 
   setOpenMatch(name: string, openMatchId: string | null) {
