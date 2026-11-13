@@ -1,6 +1,6 @@
 # Ajuste da partida
 
-Aberto pelo menu (Jogar). A pessoa escolhe o coringa (só o coringão ou também o coringa de vida), de 3 a 6 jogadores e entra no treino com robôs. O modelo das cartas é o escolhido em Configurações.
+Aberto pelo menu (Jogar). A pessoa escolhe o coringa ("Coringa" ou "Coringa de vira"), de 3 a 6 jogadores e entra no treino com robôs. O modelo das cartas é o escolhido em Configurações.
 
 Código: `apps/mobile/src/app/training.tsx`, `apps/mobile/src/features/lobby/TrainingSetup.tsx` e `apps/mobile/src/shared/cards/useCardStyle.ts`; a entrada passa pelo `join` do `MatchProvider`. No jogo, `apps/game/src/rooms/pontinho/PontinhoRoom.ts`; no motor, `packages/rules/src/game.ts`.
 
@@ -8,7 +8,8 @@ Código: `apps/mobile/src/app/training.tsx`, `apps/mobile/src/features/lobby/Tra
 
 Sem chamada à API pela tela. "Jogar" chama `client.joinOrCreate("pontinho", { bots: true, seats, lifeJoker })`, e o servidor do jogo consulta a API na entrada, como descrito em [entrada](../jogo/entrada.md).
 
-- Ao abrir: só o coringão e 4 jogadores.
+- Ao abrir: "Coringa" (só o coringão) e 4 jogadores.
+- "Coringa de vira" tem a legenda "A carta seguinte à carta virada na mesa será definida como coringa." (texto da cliente, `lobby.withLifeJokerHint`). Abaixo das duas opções fica a dica "Uma carta virada no começo da rodada define os coringas dela." (`lobby.lifeJokerHint`), como a cliente pediu.
 - Com o coringa de vida, o jogo vira uma carta no começo de cada rodada (`flipped` no estado da sala) e a mesa mostra a virada atrás do monte, o selo com os coringas da rodada e a estrela nas cartas que são coringa de vida.
 - Com 5 ou 6 jogadores, os adversários ficam numa linha só, com placas estreitas, na ordem da vez.
 

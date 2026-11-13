@@ -29,7 +29,7 @@ export function tableList(gameApi: GameApi) {
       response.status(error.code).json({ code: error.message });
       return;
     }
-    const rooms = await matchMaker.query({ name: ROOM_NAME, locked: false, bots: false });
+    const rooms = await matchMaker.query({ name: ROOM_NAME, locked: false, private: false, bots: false });
     const body: TablesResponse = {
       tables: CHIP_TABLES.map(({ id }) => ({
         table: id,

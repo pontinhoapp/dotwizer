@@ -1,7 +1,7 @@
 import Fastify from "fastify";
 import type { FastifyInstance } from "fastify";
 import { serializerCompiler, validatorCompiler } from "@fastify/type-provider-zod";
-import type { ZodTypeProvider } from "@fastify/type-provider-zod";
+import type { FastifyPluginAsyncZod, ZodTypeProvider } from "@fastify/type-provider-zod";
 import { createServices, supabaseIssuer } from "./container.ts";
 import type { AppDependencies, Services } from "./container.ts";
 import type { Env } from "./common/env/env.ts";
@@ -11,6 +11,7 @@ import { registerSecurity } from "./common/security/security.ts";
 import { createAuthenticateHook, decorateRequestWithAuth } from "./modules/auth/auth.hooks.ts";
 import { devLoginRoutes } from "./modules/auth/dev-login.routes.ts";
 import { createServiceTokenHook } from "./modules/auth/service-token.ts";
+import { friendsMatchesRoutes } from "./modules/friends-matches/friends-matches.routes.ts";
 import { internalRoutes } from "./modules/internal/internal.routes.ts";
 import { matchesRoutes } from "./modules/matches/matches.routes.ts";
 import { profileRoutes } from "./modules/profile/profile.routes.ts";
@@ -26,6 +27,14 @@ interface RegisterRoutesInput {
   env: Env;
 }
 
+function internalScope({ services, env }: Omit<RegisterRoutesInput, "app">): FastifyPluginAsyncZod {
+  return async (scope) => {
+    scope.addHook("onRequest", createServiceTokenHook({ serviceToken: env.SERVICE_TOKEN }));
+    await scope.register(internalRoutes({ internalService: services.internal, matchesService: services.matches }));
+    await scope.register(friendsMatchesRoutes({ friendsMatchesService: services.friendsMatches }));
+  };
+}
+
 function registerRoutes({ app, services, env }: RegisterRoutesInput): void {
   const typedApp = app.withTypeProvider<ZodTypeProvider>();
   typedApp.register(async (scope) => {
@@ -35,13 +44,7 @@ function registerRoutes({ app, services, env }: RegisterRoutesInput): void {
     await scope.register(storeRoutes({ service: services.store }));
     await scope.register(matchesRoutes({ service: services.matches }));
   });
-  typedApp.register(
-    async (scope) => {
-      scope.addHook("onRequest", createServiceTokenHook({ serviceToken: env.SERVICE_TOKEN }));
-      await scope.register(internalRoutes({ internalService: services.internal, matchesService: services.matches }));
-    },
-    { prefix: "/internal" },
-  );
+  typedApp.register(internalScope({ services, env }), { prefix: "/internal" });
   if (env.NODE_ENV === "development" && env.DEV_LOGIN_SECRET) {
     typedApp.register(devLoginRoutes({ secret: env.DEV_LOGIN_SECRET, issuer: supabaseIssuer({ supabaseUrl: env.SUPABASE_URL }) }));
   }

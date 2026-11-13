@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Stack } from "expo-router";
+import * as Linking from "expo-linking";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { Onest_400Regular } from "@expo-google-fonts/onest/400Regular";
@@ -15,6 +16,7 @@ import { MatchProvider, useMatch } from "@/features/match/MatchProvider";
 import { ProfileLoadError } from "@/features/profile/ProfileLoadError";
 import { useProfile } from "@/features/profile/useProfile";
 import { queryClient } from "@/shared/api/queryClient";
+import { useFriendsLinkAfterLogin } from "@/shared/navigation/friendsLink";
 import { colors } from "@/shared/theme/colors";
 import { AppSplash } from "@/shared/ui/AppSplash";
 
@@ -36,6 +38,7 @@ export default function RootLayout() {
 
 function Routes() {
   const { userId } = useSession();
+  const linkingUrl = Linking.useLinkingURL();
   const signedIn = Boolean(userId);
   const { profile, loading, failed, retry } = useProfile({ signedIn });
   const [fontsLoaded, fontsFailed] = useFonts({ Onest_400Regular, Onest_500Medium, Onest_600SemiBold, Onest_700Bold, Unbounded_600SemiBold });
@@ -51,14 +54,17 @@ function Routes() {
 
   return (
     <View style={styles.app}>
-      {ready && <AppContent signedIn={signedIn} profileComplete={profile?.complete === true} failed={failed} retry={retry} />}
+      {ready && <AppContent signedIn={signedIn} profileComplete={profile?.complete === true} failed={failed} retry={retry} linkingUrl={linkingUrl} />}
       {!splashFinished && <AppSplash fontsReady={fontsReady} appReady={ready} onFinished={() => setSplashFinished(true)} />}
     </View>
   );
 }
 
-function AppContent({ signedIn, profileComplete, failed, retry }: { signedIn: boolean; profileComplete: boolean; failed: boolean; retry: () => void }) {
+type AppContentProps = { signedIn: boolean; profileComplete: boolean; failed: boolean; retry: () => void; linkingUrl: string | null };
+
+function AppContent({ signedIn, profileComplete, failed, retry, linkingUrl }: AppContentProps) {
   const { room } = useMatch();
+  useFriendsLinkAfterLogin(linkingUrl, signedIn && profileComplete);
 
   if (failed) {
     return <ProfileLoadError onRetry={retry} />;
@@ -76,6 +82,8 @@ function AppContent({ signedIn, profileComplete, failed, retry }: { signedIn: bo
         <Stack.Screen name="index" />
         <Stack.Screen name="lobby" />
         <Stack.Screen name="training" />
+        <Stack.Screen name="amigos/index" />
+        <Stack.Screen name="amigos/[codigo]" />
         <Stack.Screen name="store" />
         <Stack.Screen name="profile" />
         <Stack.Screen name="payments" />

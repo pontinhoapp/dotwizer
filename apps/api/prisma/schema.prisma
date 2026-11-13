@@ -55,9 +55,11 @@ model User {
   createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  purchases    Purchase[]
-  matchPlayers MatchPlayer[]
-  wonMatches   Match[]       @relation("MatchWinner")
+  purchases           Purchase[]
+  matchPlayers        MatchPlayer[]
+  wonMatches          Match[]              @relation("MatchWinner")
+  friendsMatchPlayers FriendsMatchPlayer[]
+  wonFriendsMatches   FriendsMatch[]       @relation("FriendsMatchWinner")
 
   @@map("users")
 }
@@ -117,6 +119,32 @@ model MatchPlayer {
   @@id([matchId, userId])
   @@index([userId])
   @@map("match_players")
+}
+
+model FriendsMatch {
+  id         String   @id @db.Uuid
+  tableId    Int      @map("table_id")
+  pointValue Int      @map("point_value")
+  winnerId   String?  @map("winner_id") @db.Uuid
+  finishedAt DateTime @map("finished_at") @db.Timestamptz(6)
+
+  winner  User?                @relation("FriendsMatchWinner", fields: [winnerId], references: [id])
+  players FriendsMatchPlayer[]
+
+  @@map("friends_matches")
+}
+
+model FriendsMatchPlayer {
+  matchId String @map("match_id") @db.Uuid
+  userId  String @map("user_id") @db.Uuid
+  result  Int
+
+  match FriendsMatch @relation(fields: [matchId], references: [id])
+  user  User         @relation(fields: [userId], references: [id])
+
+  @@id([matchId, userId])
+  @@index([userId])
+  @@map("friends_match_players")
 }
 
 model WalletEntry {

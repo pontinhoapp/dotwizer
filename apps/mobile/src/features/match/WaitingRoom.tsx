@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Share, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { MIN_PLAYERS } from "@pontinho/protocol";
+import { friendsLink } from "@/shared/navigation/friendsLink";
 import { Avatar } from "@/shared/ui/Avatar";
 import { Button } from "@/shared/ui/Button";
 import { colors } from "@/shared/theme/colors";
 import { fonts } from "@/shared/theme/fonts";
 import match from "@/messages/match.json";
 import { tableTitle } from "@/shared/format/tableTitle";
+import { useMatch } from "./MatchProvider";
+import { sendAction } from "./messaging";
 import { hasChips, isOffline, type GameState } from "./state";
 import { TurnTimer } from "./TurnTimer";
 
@@ -15,10 +19,27 @@ const EXIT_LOCK_SECONDS = 30;
 type Props = { state: GameState; onExit: () => void };
 
 export function WaitingRoom({ state, onExit }: Props) {
-  const [exitLockSeconds, setExitLockSeconds] = useState(hasChips(state) ? EXIT_LOCK_SECONDS : 0);
+  const [exitLockSeconds, setExitLockSeconds] = useState(hasChips(state) && !state.friends ? EXIT_LOCK_SECONDS : 0);
   const status = match.waiting.replace("{count}", String(state.order.length)).replace("{seats}", String(state.seats));
   const freeSeats = Array.from({ length: Math.max(state.seats - state.order.length, 0) }, (_, index) => index);
   const exitTitle = exitLockSeconds > 0 ? match.exitIn.replace("{seconds}", String(exitLockSeconds)) : match.exit;
+  const { room } = useMatch();
+  const [linkCopied, setLinkCopied] = useState(false);
+  const code = room?.roomId ?? "";
+  const isOwner = room !== undefined && state.order[0] === room.sessionId;
+
+  async function shareLink() {
+    const link = friendsLink(code);
+    try {
+      await Share.share({ message: match.shareMessage.replace("{link}", link) });
+    } catch {
+      if (!navigator.clipboard) {
+        return;
+      }
+      await navigator.clipboard.writeText(link);
+      setLinkCopied(true);
+    }
+  }
 
   useEffect(() => {
     if (exitLockSeconds === 0) {
@@ -32,6 +53,14 @@ export function WaitingRoom({ state, onExit }: Props) {
     <SafeAreaView style={styles.container}>
       <View style={styles.center}>
         <Text style={styles.table}>{tableTitle(state.table)}</Text>
+        {state.friends && (
+          <View style={styles.invite}>
+            <Text style={styles.code} selectable>
+              {match.friendsCode.replace("{code}", code)}
+            </Text>
+            <Button title={linkCopied ? match.linkCopied : match.shareLink} onPress={shareLink} variant="secondary" />
+          </View>
+        )}
         <View style={styles.status}>
           <ActivityIndicator size="small" color={colors.action} />
           <Text style={styles.statusText}>{status}</Text>
@@ -61,7 +90,11 @@ export function WaitingRoom({ state, onExit }: Props) {
           ))}
         </View>
       </View>
-      <Button title={exitTitle} onPress={onExit} variant="secondary" disabled={exitLockSeconds > 0} />
+      <View style={styles.footer}>
+        {state.friends && isOwner && <Button title={match.start} onPress={() => room && sendAction(room, "start")} disabled={state.order.length < MIN_PLAYERS} />}
+        {state.friends && !isOwner && <Text style={styles.waitingOwner}>{match.waitingOwner}</Text>}
+        <Button title={exitTitle} onPress={onExit} variant="secondary" disabled={exitLockSeconds > 0} />
+      </View>
     </SafeAreaView>
   );
 }
@@ -73,6 +106,10 @@ const styles = StyleSheet.create({
   status: { flexDirection: "row", alignItems: "center", gap: 10 },
   statusText: { color: colors.text, fontSize: 18, fontFamily: fonts.semibold },
   countdown: { width: 220 },
+  invite: { alignSelf: "stretch", alignItems: "center", gap: 12 },
+  code: { color: colors.text, fontSize: 22, fontFamily: fonts.display, letterSpacing: 2 },
+  footer: { gap: 10 },
+  waitingOwner: { color: colors.textSoft, fontSize: 14, fontFamily: fonts.semibold, textAlign: "center" },
   seats: { alignSelf: "stretch", flexDirection: "row", flexWrap: "wrap", gap: 10 },
   seat: { width: "48.5%", height: 60, paddingHorizontal: 12, borderRadius: 14, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.plate, flexDirection: "row", alignItems: "center", gap: 10 },
   freeSeat: { borderStyle: "dashed", borderColor: colors.lineStrong, backgroundColor: "transparent" },

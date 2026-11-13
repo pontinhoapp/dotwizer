@@ -1,5 +1,5 @@
 import { ServerError, type AuthContext } from "colyseus";
-import { createOptionsSchema, JOIN_REFUSALS, openMatchRefusalMessage, PRACTICE_TABLE, type JoinRefusal } from "@pontinho/protocol";
+import { entryOptionsSchema, JOIN_REFUSALS, openMatchRefusalMessage, PRACTICE_TABLE, type JoinRefusal } from "@pontinho/protocol";
 import { describeFailure, GameApiError, type GameApi } from "../../gameApi/GameApi.js";
 import { NO_WINNER } from "./ChipsMatch.js";
 import { CLIENT_IP_HEADER, entryLimit } from "./entryLimit.js";
@@ -74,11 +74,11 @@ export function createPlayerAuthenticator(gameApi: GameApi) {
     if (!token) {
       throw refuse("invalidToken");
     }
-    const parsed = createOptionsSchema.safeParse(options);
+    const parsed = entryOptionsSchema.safeParse(options);
     if (!parsed.success) {
       throw refuse("invalidOptions");
     }
-    const chipsTable = parsed.data.bots ? undefined : parsed.data.table;
+    const chipsTable = "bots" in parsed.data && !parsed.data.bots ? parsed.data.table : undefined;
     const ip = context.headers.get(CLIENT_IP_HEADER) ?? context.ip ?? "";
     const entry = await enter(gameApi, token, chipsTable, ip);
     if (!entry.profileComplete || entry.nickname === null) {

@@ -3,6 +3,7 @@ import type { PrismaClient } from "./generated/prisma/client.ts";
 import type { Env } from "./common/env/env.ts";
 import { AuthService } from "./modules/auth/auth.service.ts";
 import { TokenVerifier } from "./modules/auth/token-verifier.ts";
+import { FriendsMatchesService } from "./modules/friends-matches/friends-matches.service.ts";
 import { InternalService } from "./modules/internal/internal.service.ts";
 import { MatchesService } from "./modules/matches/matches.service.ts";
 import type { AvatarStorage } from "./modules/profile/avatar-storage/avatar-storage.ts";
@@ -29,6 +30,7 @@ export interface Services {
   wallet: WalletService;
   store: StoreService;
   matches: MatchesService;
+  friendsMatches: FriendsMatchesService;
   internal: InternalService;
 }
 
@@ -74,7 +76,7 @@ function createMatches({ repositories, unitOfWork, now }: BuildInput): MatchesSe
   });
 }
 
-function createInternal({ auth, profile, wallet, matches }: Omit<Services, "store" | "internal">): InternalService {
+function createInternal({ auth, profile, wallet, matches }: Omit<Services, "store" | "internal" | "friendsMatches">): InternalService {
   return new InternalService({
     authService: auth,
     profileService: profile,
@@ -98,5 +100,6 @@ export function createServices(dependencies: AppDependencies): Services {
   const wallet = new WalletService({ walletRepository: repositories.wallet, now });
   const matches = createMatches(input);
   const internal = createInternal({ auth, profile, wallet, matches });
-  return { auth, profile, wallet, store: createStore(input), matches, internal };
+  const friendsMatches = new FriendsMatchesService({ friendsMatchesRepository: repositories.friendsMatches, usersRepository: repositories.users, now });
+  return { auth, profile, wallet, store: createStore(input), matches, friendsMatches, internal };
 }

@@ -7,6 +7,8 @@ import type {
   PingResponse,
   PlayerEntryBody,
   PlayerEntryResponse,
+  RecordFriendsMatchBody,
+  RecordFriendsMatchResponse,
   RegisterRoundBody,
   RegisterRoundResponse,
   StartMatchBody,
@@ -16,6 +18,7 @@ import type {
 export type RegisterRoundInput = RegisterRoundBody & { matchId: string };
 export type FinishMatchInput = FinishMatchBody & { matchId: string };
 export type EliminatePlayerInput = EliminatePlayerBody & { matchId: string };
+export type RecordFriendsMatchInput = RecordFriendsMatchBody & { matchId: string };
 
 export interface GameApi {
   ping(): Promise<PingResponse>;
@@ -24,6 +27,7 @@ export interface GameApi {
   registerRound(input: RegisterRoundInput): Promise<RegisterRoundResponse>;
   finishMatch(input: FinishMatchInput): Promise<MatchHistoryResponse>;
   eliminatePlayer(input: EliminatePlayerInput): Promise<EliminatePlayerResponse>;
+  recordFriendsMatch(input: RecordFriendsMatchInput): Promise<RecordFriendsMatchResponse>;
 }
 
 export type GameApiErrorCode = ApiErrorCode | "networkError" | "timeout" | "invalidResponse";

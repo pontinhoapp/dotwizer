@@ -15,7 +15,7 @@ type HttpGameApiInput = {
   retryDelayMs?: number;
 };
 
-type Call = { name: string; method: "GET" | "POST"; path: string; body?: unknown };
+type Call = { name: string; method: "GET" | "POST" | "PUT"; path: string; body?: unknown };
 
 function isTransient(error: unknown) {
   return !(error instanceof GameApiError) || error.status === 0 || error.status >= 500;
@@ -75,5 +75,6 @@ export function createHttpGameApi({ url, serviceToken, fetch: fetchImplementatio
     registerRound: ({ matchId, ...body }) => sendWithRetries({ name: "registerRound", method: "POST", path: `/matches/${matchId}/rounds`, body }),
     finishMatch: ({ matchId, ...body }) => sendWithRetries({ name: "finishMatch", method: "POST", path: `/matches/${matchId}/finish`, body }),
     eliminatePlayer: ({ matchId, ...body }) => sendWithRetries({ name: "eliminatePlayer", method: "POST", path: `/matches/${matchId}/eliminations`, body }),
+    recordFriendsMatch: ({ matchId, ...body }) => sendWithRetries({ name: "recordFriendsMatch", method: "PUT", path: `/friends-matches/${matchId}`, body }),
   };
 }

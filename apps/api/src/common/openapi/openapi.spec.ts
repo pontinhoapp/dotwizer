@@ -36,6 +36,7 @@ const ROUTES = [
   "POST /internal/matches/{matchId}/rounds",
   "POST /internal/matches/{matchId}/eliminations",
   "POST /internal/matches/{matchId}/finish",
+  "PUT /internal/friends-matches/{matchId}",
 ];
 
 describe("OpenAPI document", () => {

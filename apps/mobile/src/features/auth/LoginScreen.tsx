@@ -66,7 +66,7 @@ function CodeStep({ login }: { login: EmailLogin }) {
   );
 }
 
-export function LoginScreen() {
+export function LoginScreen({ notice }: { notice?: string }) {
   const login = useEmailLogin();
   const google = useGoogleLogin();
   const sessionEnd = useSessionEndReason();
@@ -77,6 +77,7 @@ export function LoginScreen() {
         <CardTrio width={60} />
         <Logo size={34} />
       </View>
+      {notice && <Notice text={notice} tone="neutral" />}
       {sessionEnd && <Notice text={SESSION_END_TEXTS[sessionEnd]} tone={sessionEnd === "expired" ? "neutral" : "danger"} />}
       {login.codeSent ? <CodeStep login={login} /> : <EmailStep login={login} google={google} />}
       {!login.codeSent && <DevLogin />}

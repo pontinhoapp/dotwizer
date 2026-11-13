@@ -10,20 +10,22 @@ import { colors } from "@/shared/theme/colors";
 import { fonts } from "@/shared/theme/fonts";
 import home from "@/messages/home.json";
 import lobby from "@/messages/lobby.json";
+import { FriendsTableSheet } from "./FriendsTableSheet";
 import type { LobbyChoice } from "./PreRoom";
 
 const SEAT_OPTIONS = Array.from({ length: TRAINING_MAX_PLAYERS - MIN_PLAYERS + 1 }, (_, index) => MIN_PLAYERS + index);
 const DEFAULT_SEATS = 4;
 const JOKER_OPTIONS = [
   { lifeJoker: false, label: lobby.onlyBigJoker, hint: "" },
-  { lifeJoker: true, label: lobby.withLifeJoker, hint: lobby.lifeJokerHint },
+  { lifeJoker: true, label: lobby.withLifeJoker, hint: lobby.withLifeJokerHint },
 ];
 
-type Props = { connecting: boolean; error: string; onConfirm: (choice: LobbyChoice) => void };
+type Props = { connecting: boolean; error: string; onConfirm: (choice: LobbyChoice) => void; onEnterWithCode: () => void };
 
-export function TrainingSetup({ connecting, error, onConfirm }: Props) {
+export function TrainingSetup({ connecting, error, onConfirm, onEnterWithCode }: Props) {
   const [lifeJoker, setLifeJoker] = useState(false);
   const [seats, setSeats] = useState(DEFAULT_SEATS);
+  const [choosingTable, setChoosingTable] = useState(false);
   const { cardStyle } = useCardStyle();
 
   return (
@@ -46,6 +48,7 @@ export function TrainingSetup({ connecting, error, onConfirm }: Props) {
             </Option>
           );
         })}
+        <Text style={styles.jokerNote}>{lobby.lifeJokerHint}</Text>
       </View>
       <View style={styles.group}>
         <Text style={styles.label}>{lobby.seats}</Text>
@@ -60,7 +63,16 @@ export function TrainingSetup({ connecting, error, onConfirm }: Props) {
       <View style={styles.footer}>
         <ErrorLine text={error} />
         <Button title={connecting ? lobby.connecting : home.play} onPress={() => onConfirm({ bots: true, seats, lifeJoker, cardStyle })} loading={connecting} />
+        <Button title={lobby.playWithFriends} onPress={() => setChoosingTable(true)} variant="secondary" disabled={connecting} />
+        <Button title={lobby.enterWithCode} onPress={onEnterWithCode} variant="plain" disabled={connecting} />
       </View>
+      <FriendsTableSheet
+        visible={choosingTable}
+        connecting={connecting}
+        error={error}
+        onClose={() => setChoosingTable(false)}
+        onCreate={(table) => onConfirm({ friends: true, seats, lifeJoker, table, cardStyle })}
+      />
     </>
   );
 }
@@ -77,6 +89,7 @@ const styles = StyleSheet.create({
   jokerLabel: { fontSize: 15, fontFamily: fonts.semibold },
   jokerHint: { color: colors.optionMuted, fontSize: 12.5, lineHeight: 17, fontFamily: fonts.regular },
   jokerHintSelected: { color: colors.optionText },
+  jokerNote: { color: colors.muted, fontSize: 12.5, lineHeight: 17, fontFamily: fonts.regular },
   options: { flexDirection: "row", gap: 8 },
   seat: { flex: 1, height: 52 },
   seatText: { fontSize: 18, fontFamily: fonts.display },

@@ -18,8 +18,9 @@
   },
   "trainingTitle": "Ajuste da partida",
   "joker": "Coringa",
-  "onlyBigJoker": "Só o coringão",
-  "withLifeJoker": "Também o coringa de vida",
+  "onlyBigJoker": "Coringa",
+  "withLifeJoker": "Coringa de vira",
+  "withLifeJokerHint": "A carta seguinte à carta virada na mesa será definida como coringa.",
   "lifeJokerHint": "Uma carta virada no começo da rodada define os coringas dela.",
   "tablesWithSeats": "Mesas · {seats} lugares",
   "tapToSit": "Toque numa mesa para sentar",
@@ -28,5 +29,14 @@
   "enterTitle": "Entrar na mesa de {table}?",
   "enterMessage": "Depois de entrar, você só pode sair após 30 segundos, se a partida não tiver começado.",
   "enter": "Entrar",
-  "cancel": "Cancelar"
+  "cancel": "Cancelar",
+  "playWithFriends": "Jogar com amigos",
+  "enterWithCode": "Entrar com código",
+  "friendsCode": "Código da sala",
+  "friendsRoomNotFound": "Sala não encontrada. Confira o código.",
+  "friendsMatchStarted": "Essa partida já começou.",
+  "signInToJoinRoom": "Entre para jogar na sala {code}",
+  "chooseTable": "Escolha a mesa",
+  "createRoom": "Criar sala",
+  "friendsChips": "Fichas só desta partida, sem mexer no seu saldo"
 }

@@ -59,7 +59,7 @@ export function RoundSummary({ room, state, userId, onExit }: Props) {
   const me = state.players[room.sessionId];
   const choosingReturn = me?.awaitingReturn === true;
 
-  if (matchOver && showChips) {
+  if (matchOver && showChips && !state.friends) {
     return <MatchEnd matchId={state.matchId} userId={userId} aborted={false} title={announcementText(state)} onExit={onExit} />;
   }
 

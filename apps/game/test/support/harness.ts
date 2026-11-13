@@ -138,6 +138,11 @@ export function setupServer() {
     return server.sdk.joinOrCreate("pontinho", options);
   }
 
+  function joinByCode(token: string, code: string) {
+    server.sdk.auth.token = token;
+    return server.sdk.joinById(code, { code });
+  }
+
   function reconnect(reconnectionToken: string) {
     return server.sdk.reconnect(reconnectionToken);
   }
@@ -147,5 +152,5 @@ export function setupServer() {
     return server.http.get("/tables", { headers: { [CLIENT_IP_HEADER]: CLIENT_IP, ...authorization } });
   }
 
-  return { api, connect, connectWith, createRoom, getTables, joinOrCreate, reconnect, startMatchWith };
+  return { api, connect, connectWith, createRoom, getTables, joinByCode, joinOrCreate, reconnect, startMatchWith };
 }
