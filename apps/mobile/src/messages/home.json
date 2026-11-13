@@ -1,6 +1,6 @@
 {
   "title": "DotWizer",
-  "officialName": "(Pontinho)",
+  "officialName": "Pontinho",
   "loadingData": "Carregando seus dados…",
   "play": "Jogar",
   "connectionClosed": "A conexão com a sala foi encerrada",
@@ -23,7 +23,11 @@
   "paymentsHint": "Gerenciamento de cartões e contas",
   "profile": "Perfil",
   "settings": "Configurações",
+  "settingsHint": "Aparência e notificações",
   "stats": "Estatísticas",
+  "statsHint": "Seu desempenho nas partidas",
   "manual": "Manual DotWizer",
-  "help": "Ajuda"
+  "manualHint": "Regras e como jogar",
+  "help": "Ajuda",
+  "helpHint": "Dúvidas e suporte"
 }

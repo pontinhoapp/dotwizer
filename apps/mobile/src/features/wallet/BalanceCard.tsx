@@ -7,11 +7,11 @@ import wallet from "@/messages/wallet.json";
 
 const UNKNOWN_BALANCE = "—";
 
-export function ChipBalance({ balance }: { balance?: number }) {
+export function ChipBalance({ balance, compact = false }: { balance?: number; compact?: boolean }) {
   return (
     <View style={styles.row}>
-      <Icon name="chip" size={18} color={colors.action} />
-      <Text style={styles.value}>{balance === undefined ? UNKNOWN_BALANCE : formatChips(balance)}</Text>
+      <Icon name="chip" size={compact ? 14 : 18} color={colors.action} />
+      <Text style={[styles.value, compact && styles.compactValue]}>{balance === undefined ? UNKNOWN_BALANCE : formatChips(balance)}</Text>
     </View>
   );
 }
@@ -29,5 +29,6 @@ const styles = StyleSheet.create({
   card: { alignItems: "flex-end", gap: 2 },
   row: { flexDirection: "row", alignItems: "center", gap: 6 },
   value: { color: colors.text, fontSize: 19, fontFamily: fonts.display, fontVariant: ["tabular-nums"] },
+  compactValue: { fontSize: 14 },
   label: { color: colors.muted, fontSize: 11, fontFamily: fonts.semibold },
 });

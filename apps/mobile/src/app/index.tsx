@@ -35,10 +35,10 @@ export default function Menu() {
           <Logo size={22} />
           <Text style={styles.officialName}>{home.officialName}</Text>
         </View>
-        <View style={styles.player}>
-          <Avatar name={profile?.nickname ?? ""} size={36} photoUrl={profile?.photoUrl} />
-          <ChipBalance balance={wallet.balance} />
-        </View>
+        <Pressable onPress={() => router.push("/profile")} accessibilityRole="button" accessibilityLabel={home.profile} style={({ pressed }) => [styles.player, pressed && styles.pressed]}>
+          <ChipBalance balance={wallet.balance} compact />
+          <Avatar name={profile?.nickname ?? ""} size={44} photoUrl={profile?.photoUrl} />
+        </Pressable>
       </View>
       {wallet.error !== "" && <Notice text={wallet.error} tone="danger" onRetry={wallet.retry} />}
       {error !== "" && <Notice text={error} tone="danger" />}
@@ -66,7 +66,7 @@ export default function Menu() {
         <Icon name="chevron" size={18} color={colors.faint} />
       </Pressable>
       <View accessibilityRole="menu" style={styles.list}>
-        <Pressable onPress={() => router.push("/payments")} accessibilityRole="button" style={({ pressed }) => [styles.listRow, styles.paymentsRow, pressed && styles.pressed]}>
+        <Pressable onPress={() => router.push("/payments")} accessibilityRole="button" style={({ pressed }) => [styles.listRow, pressed && styles.pressed]}>
           <Icon name="payments" size={22} color={colors.text} />
           <View style={styles.listText}>
             <Text style={styles.listTitle}>{home.payments}</Text>
@@ -74,33 +74,23 @@ export default function Menu() {
           </View>
           <Icon name="chevron" size={18} color={colors.faint} />
         </Pressable>
-        <MenuRow icon="person" title={home.profile} onPress={() => router.push("/profile")} />
-        <MenuRow icon="settings" title={home.settings} onPress={() => router.push("/settings")} />
-        <MenuRow icon="stats" title={home.stats} onPress={() => router.push("/stats")} last />
       </View>
       <View style={styles.smallButtons}>
-        <SmallButton icon="book" title={home.manual} onPress={() => router.push("/manual")} />
-        <SmallButton icon="help" title={home.help} onPress={() => router.push("/help")} />
+        <SmallButton icon="book" title={home.manual} hint={home.manualHint} onPress={() => router.push("/manual")} />
+        <SmallButton icon="help" title={home.help} hint={home.helpHint} onPress={() => router.push("/help")} />
       </View>
     </Screen>
   );
 }
 
-function MenuRow({ icon, title, onPress, last = false }: { icon: IconName; title: string; onPress: () => void; last?: boolean }) {
-  return (
-    <Pressable onPress={onPress} accessibilityRole="button" style={({ pressed }) => [styles.listRow, last && styles.lastRow, pressed && styles.pressed]}>
-      <Icon name={icon} size={22} color={colors.text} />
-      <Text style={[styles.listTitle, styles.listText]}>{title}</Text>
-      <Icon name="chevron" size={18} color={colors.faint} />
-    </Pressable>
-  );
-}
-
-function SmallButton({ icon, title, onPress }: { icon: IconName; title: string; onPress: () => void }) {
+function SmallButton({ icon, title, hint, onPress }: { icon: IconName; title: string; hint: string; onPress: () => void }) {
   return (
     <Pressable onPress={onPress} accessibilityRole="button" style={({ pressed }) => [styles.smallButton, pressed && styles.pressed]}>
       <Icon name={icon} size={18} color={colors.text} />
-      <Text style={styles.smallTitle}>{title}</Text>
+      <View style={styles.smallText}>
+        <Text style={styles.smallTitle}>{title}</Text>
+        <Text style={styles.smallHint}>{hint}</Text>
+      </View>
     </Pressable>
   );
 }
@@ -122,12 +112,12 @@ const styles = StyleSheet.create({
   practiceTitle: { color: colors.text, fontSize: 17, fontFamily: fonts.display },
   hint: { color: colors.muted, fontSize: 13, fontFamily: fonts.regular },
   list: { borderRadius: 20, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface },
-  listRow: { height: 58, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", gap: 14, borderBottomWidth: 1, borderBottomColor: colors.divider },
-  paymentsRow: { height: 66 },
-  lastRow: { borderBottomWidth: 0 },
+  listRow: { height: 66, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", gap: 14 },
   listText: { flex: 1, gap: 2 },
   listTitle: { color: colors.text, fontSize: 16, fontFamily: fonts.semibold },
   smallButtons: { flexDirection: "row", gap: 12 },
-  smallButton: { flex: 1, height: 48, paddingHorizontal: 14, borderRadius: 14, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface, flexDirection: "row", alignItems: "center", gap: 8 },
-  smallTitle: { flexShrink: 1, color: colors.text, fontSize: 14, fontFamily: fonts.semibold },
+  smallButton: { flex: 1, minHeight: 64, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 14, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface, flexDirection: "row", alignItems: "center", gap: 8 },
+  smallText: { flexShrink: 1, gap: 2 },
+  smallTitle: { color: colors.text, fontSize: 14, fontFamily: fonts.semibold },
+  smallHint: { color: colors.muted, fontSize: 12, fontFamily: fonts.regular },
 });

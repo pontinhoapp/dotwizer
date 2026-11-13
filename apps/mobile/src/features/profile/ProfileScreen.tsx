@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { Address } from "@pontinho/api-contract";
 import { useQuery } from "@tanstack/react-query";
+import { router } from "expo-router";
 import { profileQueryOptions } from "@/shared/api/profile";
 import { maskCpf } from "@/shared/format/cpf";
 import { formatChips } from "@/shared/format/numbers";
 import { goBackOrHome } from "@/shared/navigation/goBackOrHome";
 import { Avatar } from "@/shared/ui/Avatar";
-import { Icon } from "@/shared/ui/Icon";
+import { Icon, type IconName } from "@/shared/ui/Icon";
 import { Notice } from "@/shared/ui/Notice";
 import { Screen } from "@/shared/ui/Screen";
 import { ScreenHeader } from "@/shared/ui/ScreenHeader";
@@ -110,6 +111,10 @@ export function ProfileScreen({ balance, signOut }: Props) {
             <ContactLine label={profileMessages.addressLabel} value={addressSummary(profile.address)} onChange={() => open("address")} />
             <ContactLine label={profileMessages.passwordLabel} value={profileMessages.passwordValue} onChange={() => open("password")} last />
           </View>
+          <View style={styles.box}>
+            <NavLine icon="settings" title={home.settings} hint={home.settingsHint} onPress={() => router.push("/settings")} />
+            <NavLine icon="stats" title={home.stats} hint={home.statsHint} onPress={() => router.push("/stats")} last />
+          </View>
         </>
       )}
       <View style={styles.footer}>
@@ -138,6 +143,19 @@ function addressSummary(address: Address | null) {
     return UNKNOWN;
   }
   return `${address.street}, ${address.number} · ${address.city}/${address.state}`;
+}
+
+function NavLine({ icon, title, hint, onPress, last = false }: { icon: IconName; title: string; hint: string; onPress: () => void; last?: boolean }) {
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" style={({ pressed }) => [styles.navLine, !last && styles.divided, pressed && styles.pressed]}>
+      <Icon name={icon} size={20} color={colors.text} />
+      <View style={styles.flex}>
+        <Text style={styles.navTitle}>{title}</Text>
+        <Text style={styles.label}>{hint}</Text>
+      </View>
+      <Icon name="chevron" size={18} color={colors.faint} />
+    </Pressable>
+  );
 }
 
 function DataLine({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
@@ -170,6 +188,8 @@ function ContactLine({ label, value, onChange, last = false }: ContactLineProps)
 }
 
 const styles = StyleSheet.create({
+  navLine: { minHeight: 58, flexDirection: "row", alignItems: "center", gap: 14, paddingVertical: 10 },
+  navTitle: { color: colors.text, fontSize: 16, fontFamily: fonts.semibold },
   flex: { flex: 1, minWidth: 0, gap: 2 },
   pressed: { opacity: 0.85 },
   game: { padding: 16, borderRadius: 22, borderWidth: 1, borderColor: colors.lineStrong, backgroundColor: colors.surface, flexDirection: "row", alignItems: "center", gap: 16 },
