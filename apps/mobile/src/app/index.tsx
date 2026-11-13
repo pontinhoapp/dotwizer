@@ -66,20 +66,27 @@ export default function Menu() {
         <Icon name="chevron" size={18} color={colors.faint} />
       </Pressable>
       <View accessibilityRole="menu" style={styles.list}>
-        <Pressable onPress={() => router.push("/payments")} accessibilityRole="button" style={({ pressed }) => [styles.listRow, pressed && styles.pressed]}>
-          <Icon name="payments" size={22} color={colors.text} />
-          <View style={styles.listText}>
-            <Text style={styles.listTitle}>{home.payments}</Text>
-            <Text style={styles.hint}>{home.paymentsHint}</Text>
-          </View>
-          <Icon name="chevron" size={18} color={colors.faint} />
-        </Pressable>
+        <ListRow icon="payments" title={home.payments} hint={home.paymentsHint} onPress={() => router.push("/payments")} />
+        <ListRow icon="stats" title={home.stats} hint={home.statsHint} onPress={() => router.push("/stats")} divided />
       </View>
       <View style={styles.smallButtons}>
         <SmallButton icon="book" title={home.manual} hint={home.manualHint} onPress={() => router.push("/manual")} />
         <SmallButton icon="help" title={home.help} hint={home.helpHint} onPress={() => router.push("/help")} />
       </View>
     </Screen>
+  );
+}
+
+function ListRow({ icon, title, hint, onPress, divided }: { icon: IconName; title: string; hint: string; onPress: () => void; divided?: boolean }) {
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" style={({ pressed }) => [styles.listRow, divided && styles.divided, pressed && styles.pressed]}>
+      <Icon name={icon} size={22} color={colors.text} />
+      <View style={styles.listText}>
+        <Text style={styles.listTitle}>{title}</Text>
+        <Text style={styles.hint}>{hint}</Text>
+      </View>
+      <Icon name="chevron" size={18} color={colors.faint} />
+    </Pressable>
   );
 }
 
@@ -113,6 +120,7 @@ const styles = StyleSheet.create({
   hint: { color: colors.muted, fontSize: 13, fontFamily: fonts.regular },
   list: { borderRadius: 20, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface },
   listRow: { height: 66, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", gap: 14 },
+  divided: { borderTopWidth: 1, borderTopColor: colors.line },
   listText: { flex: 1, gap: 2 },
   listTitle: { color: colors.text, fontSize: 16, fontFamily: fonts.semibold },
   smallButtons: { flexDirection: "row", gap: 12 },

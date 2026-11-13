@@ -112,8 +112,7 @@ export function ProfileScreen({ balance, signOut }: Props) {
             <ContactLine label={profileMessages.passwordLabel} value={profileMessages.passwordValue} onChange={() => open("password")} last />
           </View>
           <View style={styles.box}>
-            <NavLine icon="settings" title={home.settings} hint={home.settingsHint} onPress={() => router.push("/settings")} />
-            <NavLine icon="stats" title={home.stats} hint={home.statsHint} onPress={() => router.push("/stats")} last />
+            <NavLine icon="settings" title={home.settings} hint={home.settingsHint} onPress={() => router.push("/settings")} last />
           </View>
         </>
       )}
