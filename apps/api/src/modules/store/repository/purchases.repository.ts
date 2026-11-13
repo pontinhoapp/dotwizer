@@ -22,6 +22,7 @@ interface CreateOnceInput {
   amountCents: number;
   provider: PaymentProviderName;
   idempotencyKey: string;
+  createdAt: Date;
 }
 
 interface AttachProviderTransactionInput {
