@@ -38,5 +38,8 @@
   "signInToJoinRoom": "Entre para jogar na sala {code}",
   "chooseTable": "Escolha a mesa",
   "createRoom": "Criar sala",
-  "friendsChips": "Fichas só desta partida, sem mexer no seu saldo"
+  "friendsChips": "Fichas só desta partida, sem mexer no seu saldo",
+  "pixPerPointLabel": "Acerto por Pix, em reais por ponto",
+  "pixPerPointHint": "Deixe vazio para jogar sem Pix. Exemplo: 0,10",
+  "pixPerPointInvalid": "Digite um valor em reais, como 0,10"
 }

@@ -31,6 +31,7 @@ describe("profile routes", () => {
       address: null, bankAccount: null,
       photoUrl: null,
       pixKeyRegistered: false,
+      pixSettlement: false,
       complete: false,
     });
     assert.strictEqual(await testPrisma.user.count({ where: { id: userId } }), 1);
@@ -404,6 +405,6 @@ describe("profile routes", () => {
 
     const response = await testApp.app.inject({ method: "GET", url: "/profile", headers });
 
-    assert.deepStrictEqual(Object.keys(response.json()).sort(), ["address", "bankAccount", "birthDate", "complete", "cpf", "email", "fullName", "id", "nickname", "phone", "photoUrl", "pixKeyRegistered"]);
+    assert.deepStrictEqual(Object.keys(response.json()).sort(), ["address", "bankAccount", "birthDate", "complete", "cpf", "email", "fullName", "id", "nickname", "phone", "photoUrl", "pixKeyRegistered", "pixSettlement"]);
   });
 });

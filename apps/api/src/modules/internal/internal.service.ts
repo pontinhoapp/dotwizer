@@ -63,6 +63,8 @@ export class InternalService {
       minimumBalance,
       canJoin: canJoin({ balance, minimumBalance }),
       openMatchId,
+      pixSettlement: profile.pixSettlement,
+      pixKeyRegistered: profile.pixKeyRegistered,
     };
   }
 }

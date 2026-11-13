@@ -26,6 +26,7 @@ function buildService({ balance = 5000, complete = true, nickname = "Ana" as str
       phone: null,
       address: null, bankAccount: null,
       pixKeyRegistered: false,
+      pixSettlement: false,
       birthDate: complete ? "1990-05-20" : null,
       photoUrl: "https://storage.example.com/ana.jpg",
       complete,
@@ -53,6 +54,8 @@ describe("InternalService", () => {
         minimumBalance: 5000,
         canJoin: true,
         openMatchId: null,
+        pixSettlement: false,
+        pixKeyRegistered: false,
       });
     });
 
@@ -88,6 +91,8 @@ describe("InternalService", () => {
         minimumBalance: null,
         canJoin: null,
         openMatchId: null,
+        pixSettlement: false,
+        pixKeyRegistered: false,
       });
     });
 
