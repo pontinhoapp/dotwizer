@@ -29,6 +29,8 @@ const ICONS = {
   settings: { ios: "gearshape", material: "settings" },
   stats: { ios: "chart.bar", material: "bar_chart" },
   help: { ios: "questionmark.circle", material: "help" },
+  palette: { ios: "paintpalette", material: "palette" },
+  bell: { ios: "bell", material: "notifications" },
 } satisfies Record<string, { ios: SFSymbol; material: AndroidSymbol }>;
 
 export type IconName = keyof typeof ICONS;

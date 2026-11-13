@@ -1,0 +1,17 @@
+{
+  "appearance": "Aparência",
+  "notifications": "Notificações",
+  "notificationsDenied": "Permita as notificações nos ajustes do aparelho.",
+  "notificationChannel": "DotWizer",
+  "tableFelt": "Fundo da mesa",
+  "felts": {
+    "green": "Verde",
+    "blue": "Azul",
+    "wine": "Vinho",
+    "petrol": "Petróleo",
+    "purple": "Roxo",
+    "graphite": "Grafite",
+    "leather": "Couro",
+    "olive": "Oliva"
+  }
+}

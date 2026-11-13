@@ -80,6 +80,7 @@ function AppContent({ signedIn, profileComplete, failed, retry }: { signedIn: bo
         <Stack.Screen name="profile" />
         <Stack.Screen name="payments" />
         <Stack.Screen name="settings" />
+        <Stack.Screen name="appearance" />
         <Stack.Screen name="stats" />
         <Stack.Screen name="manual" />
         <Stack.Screen name="help" />

@@ -39,3 +39,21 @@ export const colors = {
   brandDot: "#FF5A4E",
   danger: "#C2353A",
 };
+
+export const felts = {
+  green: ["#0C3320", "#071F13", "#030B06"],
+  blue: ["#0F2C4A", "#091B2E", "#030A12"],
+  wine: ["#40121D", "#270A12", "#0E0306"],
+  petrol: ["#0A3538", "#062123", "#020B0C"],
+  purple: ["#2A1A48", "#191030", "#080412"],
+  graphite: ["#2A2D30", "#191B1D", "#08090A"],
+  leather: ["#40291A", "#28190F", "#0E0805"],
+  olive: ["#2F3517", "#1D210D", "#0A0B04"],
+} as const;
+
+export type FeltName = keyof typeof felts;
+
+export function feltBackground(felt: FeltName) {
+  const [center, middle, edge] = felts[felt];
+  return { backgroundColor: center, backgroundImage: `radial-gradient(ellipse 110% 70% at 50% 45%, ${center} 0%, ${middle} 55%, ${edge} 100%)` };
+}

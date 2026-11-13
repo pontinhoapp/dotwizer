@@ -3,8 +3,9 @@ import { usePreventRemove } from "expo-router";
 import type { Room } from "@colyseus/sdk";
 import { useRoomState } from "@colyseus/react";
 import type { PontinhoState } from "@pontinho/protocol";
-import { colors } from "@/shared/theme/colors";
+import { colors, feltBackground } from "@/shared/theme/colors";
 import { fonts } from "@/shared/theme/fonts";
+import { useFeltColor } from "@/shared/theme/useFeltColor";
 import match from "@/messages/match.json";
 import { MatchEnd } from "./MatchEnd";
 import { useMatch } from "./MatchProvider";
@@ -14,10 +15,11 @@ import { WaitingRoom } from "./WaitingRoom";
 
 export function Match({ userId }: { userId?: string }) {
   const { room, connecting, reconnecting, matchAborted, leave } = useMatch();
+  const { felt } = useFeltColor();
   usePreventRemove(room !== undefined, leave);
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, feltBackground(felt)]}>
       {room && <MatchRoom room={room} userId={userId} matchAborted={matchAborted} onExit={leave} />}
       {room && (reconnecting || connecting) && (
         <View style={styles.reconnecting}>
@@ -55,5 +57,5 @@ const styles = StyleSheet.create({
   reconnecting: { ...StyleSheet.absoluteFill, alignItems: "center", paddingTop: 110, backgroundColor: "rgba(3, 6, 4, 0.6)" },
   reconnectingPill: { height: 44, paddingHorizontal: 18, borderRadius: 22, borderWidth: 1, borderColor: colors.lineStrong, backgroundColor: colors.surface, flexDirection: "row", alignItems: "center", gap: 10 },
   reconnectingText: { color: colors.text, fontSize: 15, fontFamily: fonts.semibold },
-  screen: { flex: 1, backgroundColor: colors.feltNight, backgroundImage: colors.feltRoom, userSelect: "none" },
+  screen: { flex: 1, userSelect: "none" },
 });
