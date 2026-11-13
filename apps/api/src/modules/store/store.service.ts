@@ -111,7 +111,7 @@ export class StoreService {
   async buy({ userId, quantity, idempotencyKey }: BuyInput): Promise<PurchaseResponse> {
     const { amountCents } = this.quote({ quantity });
     const provider = this.paymentProvider.name;
-    const purchase = await this.purchasesRepository.createOnce({ userId, quantity, amountCents, provider, idempotencyKey });
+    const purchase = await this.purchasesRepository.createOnce({ userId, quantity, amountCents, provider, idempotencyKey, createdAt: this.now() });
     if (purchase.quantity !== quantity) {
       throw new ApiError({ code: "idempotencyKeyReused" });
     }

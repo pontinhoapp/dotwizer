@@ -7,6 +7,6 @@ describe("generateOpenApiDocument", () => {
 
     assert.strictEqual(document.openapi, "3.0.3");
     assert.strictEqual(document.info.title, "DotWizer API");
-    assert.strictEqual(Object.keys(document.paths).length, 16);
+    assert.strictEqual(Object.keys(document.paths).length, 18);
   });
 });

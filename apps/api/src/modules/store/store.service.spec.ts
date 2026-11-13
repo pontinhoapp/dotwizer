@@ -166,7 +166,7 @@ describe("StoreService", () => {
       await service.buy({ userId, quantity: 2_000, idempotencyKey });
 
       assert.deepStrictEqual(createCalls, [
-        { userId, quantity: 2_000, amountCents: 200_000, provider: "TEST", idempotencyKey },
+        { userId, quantity: 2_000, amountCents: 200_000, provider: "TEST", idempotencyKey, createdAt: paidAt },
       ]);
     });
 
