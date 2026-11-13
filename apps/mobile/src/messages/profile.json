@@ -39,5 +39,16 @@
   "deleteAccount": "Excluir conta",
   "deleteTitle": "Excluir conta?",
   "deleteMessage": "A conta é desativada e o extrato fica guardado.",
-  "cancel": "Cancelar"
+  "cancel": "Cancelar",
+  "passwordLabel": "Senha",
+  "passwordValue": "Opcional, para entrar sem código",
+  "passwordHint": "Com uma senha, você entra com e-mail e senha. O código por e-mail continua valendo.",
+  "newPasswordLabel": "Nova senha (8 caracteres ou mais)",
+  "confirmPasswordLabel": "Repita a senha",
+  "passwordMismatch": "As senhas não são iguais.",
+  "passwordCodeLabel": "Código enviado por e-mail",
+  "passwordCodeSent": "Para trocar a senha, confirme com o código que enviamos para o seu e-mail.",
+  "weakPassword": "Senha fraca. Use mais caracteres, misturando letras e números.",
+  "samePassword": "A nova senha precisa ser diferente da atual.",
+  "invalidPasswordCode": "Código inválido ou expirado."
 }

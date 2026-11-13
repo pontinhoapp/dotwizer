@@ -21,13 +21,14 @@ import profileMessages from "@/messages/profile.json";
 import wallet from "@/messages/wallet.json";
 import { toBirthDateInput } from "./birthDate";
 import { AddressSheet } from "./AddressSheet";
+import { PasswordSheet } from "./PasswordSheet";
 import { DeleteSheet, NicknameSheet, PhoneSheet, PhotoSheet } from "./ProfileSheets";
 import { useDeleteAccount } from "./useDeleteAccount";
 import { useProfileUpdate } from "./useProfileUpdate";
 
 const UNKNOWN = "—";
 
-type SheetName = "photo" | "nickname" | "phone" | "address" | "delete";
+type SheetName = "photo" | "nickname" | "phone" | "address" | "password" | "delete";
 
 type SignOut = { signOut: () => void; pending: boolean; error: string };
 
@@ -106,7 +107,8 @@ export function ProfileScreen({ balance, signOut }: Props) {
             <Text style={[styles.boxTitle, styles.boxTitleRow]}>{profileMessages.contact}</Text>
             <ContactLine label={auth.emailLabel} value={profile.email} />
             <ContactLine label={profileMessages.phoneLabel} value={profile.phone ?? UNKNOWN} onChange={() => open("phone")} />
-            <ContactLine label={profileMessages.addressLabel} value={addressSummary(profile.address)} onChange={() => open("address")} last />
+            <ContactLine label={profileMessages.addressLabel} value={addressSummary(profile.address)} onChange={() => open("address")} />
+            <ContactLine label={profileMessages.passwordLabel} value={profileMessages.passwordValue} onChange={() => open("password")} last />
           </View>
         </>
       )}
@@ -124,6 +126,7 @@ export function ProfileScreen({ balance, signOut }: Props) {
         {sheet === "nickname" && <NicknameSheet current={profile?.nickname ?? ""} saving={update.saving} error={update.error} onSave={(nickname) => update.save({ nickname })} />}
         {sheet === "phone" && <PhoneSheet current={profile?.phone ?? ""} saving={update.saving} error={update.error} onSave={(phone) => update.save({ phone })} />}
         {sheet === "address" && <AddressSheet current={profile?.address ?? null} saving={update.saving} error={update.error} onSave={(address) => update.save({ address })} />}
+        {sheet === "password" && <PasswordSheet onSaved={close} />}
         {sheet === "delete" && <DeleteSheet deleting={deletion.pending} error={deletion.error} onDelete={deletion.remove} onCancel={close} />}
       </Sheet>
     </Screen>

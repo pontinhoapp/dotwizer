@@ -13,6 +13,7 @@ Código: `apps/mobile/src/app/profile.tsx` e `apps/mobile/src/features/profile/`
 | Editar apelido | `PATCH /profile` com `{ nickname }` | A folha fecha e o apelido novo aparece. |
 | Alterar celular | `PATCH /profile` com `{ phone }`, com os 11 dígitos | A folha fecha e o celular aparece, sem máscara. |
 | Alterar endereço | O CEP com 8 dígitos consulta `https://viacep.com.br/ws/{cep}/json/` e preenche rua, bairro, cidade e UF; depois `PATCH /profile` com `{ address }` | A folha fecha e o endereço aparece resumido. Se o ViaCEP falhar, aparece "CEP não encontrado" e os campos ficam livres. |
+| Senha | `supabase.auth.updateUser({ password })`; se o Supabase pedir confirmação (`reauthentication_needed`), `supabase.auth.reauthenticate()` manda um código por e-mail e a troca vai com `{ password, nonce }` | A folha fecha. Depois disso dá para entrar com e-mail e senha, e o código por e-mail continua valendo. |
 | Remover endereço | `PATCH /profile` com `{ address: null }` | O endereço volta a "—". |
 | Sair | `supabase.auth.signOut()` | Volta ao login, sem confirmação. |
 | Excluir conta | `DELETE /profile`, depois `supabase.auth.signOut()` | A API responde 204 e o app volta ao login. |
@@ -51,6 +52,8 @@ Os erros que valem para toda rota estão em [erros comuns](erros-comuns.md).
 - O `DELETE /profile` trava a linha da conta antes de conferir a partida aberta, como o começo de partida faz. É comportamento do código.
 
 - Endereço opcional, com CEP, rua, número, complemento (pode ficar vazio), bairro, cidade e UF; o CEP preenche o resto pelo ViaCEP. O e-mail continua só para leitura. (Cliente, 11/11/2026; Lucas, 11/11/2026: "CEP preenche o resto")
+
+- Senha opcional, com 8 caracteres ou mais, criada ou trocada no perfil. O login ganha "Entrar com senha" (`signInWithPassword`), e o código por e-mail e o Google continuam. (Cliente, 11/11/2026; Lucas, 11/11/2026: "Senha opcional, código continua")
 
 ## Testes
 

@@ -29,15 +29,30 @@ function EmailStep({ login, google }: { login: EmailLogin; google: GoogleLogin }
         autoCapitalize="none"
         autoComplete="email"
         textContentType="emailAddress"
-        onSubmitEditing={login.requestCode}
-        error={login.error}
+        onSubmitEditing={login.usingPassword ? undefined : login.requestCode}
+        error={login.usingPassword ? "" : login.error}
       />
-      <Button
-        title={login.sending ? auth.sending : auth.sendCode}
-        onPress={login.requestCode}
-        disabled={!login.canRequestCode}
-        loading={login.sending}
-      />
+      {login.usingPassword ? (
+        <>
+          <TextField
+            label={auth.passwordLabel}
+            value={login.password}
+            onChangeText={login.setPassword}
+            secureTextEntry
+            autoComplete="current-password"
+            textContentType="password"
+            onSubmitEditing={login.signIn}
+            error={login.error}
+          />
+          <Button title={login.signingIn ? auth.checking : auth.confirmCode} onPress={login.signIn} disabled={!login.canSignInWithPassword} loading={login.signingIn} />
+          <Button title={auth.useCode} onPress={() => login.switchToPassword(false)} variant="plain" />
+        </>
+      ) : (
+        <>
+          <Button title={login.sending ? auth.sending : auth.sendCode} onPress={login.requestCode} disabled={!login.canRequestCode} loading={login.sending} />
+          <Button title={auth.usePassword} onPress={() => login.switchToPassword(true)} variant="plain" />
+        </>
+      )}
       <Button
         title={google.status === "checking" ? auth.checking : auth.google}
         onPress={google.signIn}
