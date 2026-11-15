@@ -128,6 +128,8 @@ describe("internal routes", () => {
         minimumBalance: 5000,
         canJoin: true,
         openMatchId: null,
+        pixSettlement: false,
+        pixKeyRegistered: false,
       });
       assert.strictEqual(table3.json().canJoin, false);
       assert.strictEqual(table3.json().minimumBalance, 10_000);
@@ -155,6 +157,8 @@ describe("internal routes", () => {
         minimumBalance: null,
         canJoin: null,
         openMatchId: null,
+        pixSettlement: false,
+        pixKeyRegistered: false,
       });
     });
 
