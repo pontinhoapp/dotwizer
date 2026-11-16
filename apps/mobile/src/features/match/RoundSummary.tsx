@@ -9,6 +9,7 @@ import match from "@/messages/match.json";
 import { ChipsAmount } from "./ChipsAmount";
 import { ExitButton } from "./ExitButton";
 import { MatchEnd } from "./MatchEnd";
+import { PixSettlement } from "./PixSettlement";
 import { ReturnPrompt } from "./ReturnPrompt";
 import { tableTitle } from "@/shared/format/tableTitle";
 import { announcementText, hasChips, isSittingOut, needsExitConfirmation, type GameState } from "./state";
@@ -104,6 +105,7 @@ export function RoundSummary({ room, state, userId, onExit }: Props) {
             </View>
           ))}
         </View>
+        {matchOver && state.pixTransfers.length > 0 && <PixSettlement state={state} sessionId={room.sessionId} />}
         {choosingReturn && <ReturnPrompt room={room} state={state} />}
         {!matchOver && <Text style={styles.next}>{match.summary.nextRound}</Text>}
       </ScrollView>

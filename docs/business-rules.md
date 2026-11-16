@@ -65,6 +65,7 @@ No app, a mesa se chama pelo valor do ponto ("1 ficha por ponto", com "Mín. 1.0
 - Não vale fichas da carteira: todos começam com o saldo mínimo da mesa escolhida, as fichas passam entre os jogadores só dentro da partida, e não há bônus de vitória nem saldo mínimo para entrar. O resultado de cada um fica gravado para o ranking. (Lucas, 12/11/2026)
 - A partida começa quando os lugares enchem ou quando o dono toca em Começar, com pelo menos 3 pessoas. Se o dono sai, o próximo da mesa vira dono. Não há bloqueio de 30 s no Sair. (Lucas, 12/11/2026)
 - Quem cai guarda o lugar e volta, como na mesa online. (Lucas, 11/11/2026)
+- **Acerto por Pix:** só para contas com a flag `pix_settlement` ligada no banco. Quem cria a sala digita os reais por ponto. Todos precisam da flag: quem entra sem ela faz a sala perder o Pix, e quem tem a flag sem chave Pix cadastrada não entra. No fim, o app mostra quem paga quanto a quem, com o menor número de Pix, cada um com o Pix Copia e Cola e o QR na chave CPF de quem recebe. Nenhum dinheiro passa pelo app. (Lucas, 13/11/2026)
 
 ### Uma partida por vez
 - Uma conta ocupa um lugar só. Enquanto a partida de alguém não acaba, essa pessoa não entra em outra, nem no treino; ao tentar, o app oferece voltar à partida em andamento. Quem foi eliminado fica livre. (Regras.md, «Quem cai ou sai»; Plano.md, «Feito»)

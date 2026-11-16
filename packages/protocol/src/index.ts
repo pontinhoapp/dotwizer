@@ -35,6 +35,15 @@ export const Player = schema({
 });
 export type Player = SchemaType<typeof Player>;
 
+export const PixTransferState = schema({
+  from: t.string(),
+  to: t.string(),
+  amountCents: t.uint32(),
+  pixCopyPaste: t.string(),
+  qrCode: t.string(),
+});
+export type PixTransferState = SchemaType<typeof PixTransferState>;
+
 export const PontinhoState = schema({
   players: t.map(Player),
   order: t.array("string"),
@@ -61,6 +70,8 @@ export const PontinhoState = schema({
   stockCount: t.uint8().default(0),
   lifeJoker: t.boolean().default(false),
   friends: t.boolean().default(false),
+  centsPerPoint: t.uint32().default(0),
+  pixTransfers: t.array(PixTransferState),
   flipped: t.ref(CardState).optional(),
   melds: t.array(MeldState),
 });
@@ -91,7 +102,7 @@ export const friendsCodeSchema = z.string().length(FRIENDS_CODE_LENGTH).regex(ne
 export const createOptionsSchema = z.union([
   z.object({ bots: z.literal(true), seats: seatsSchema, lifeJoker: z.boolean().default(false), table: tableSchema.optional() }),
   z.object({ bots: z.literal(false), table: tableSchema }),
-  z.object({ friends: z.literal(true), seats: seatsSchema, lifeJoker: z.boolean().default(false), table: tableSchema }),
+  z.object({ friends: z.literal(true), seats: seatsSchema, lifeJoker: z.boolean().default(false), table: tableSchema, centsPerPoint: z.number().int().positive().optional() }),
 ]);
 
 export const entryOptionsSchema = z.union([createOptionsSchema, z.object({ code: friendsCodeSchema })]);
@@ -146,6 +157,7 @@ export const JOIN_REFUSALS = {
   accountDisabled: { code: 403, message: "accountDisabled" },
   entryFailed: { code: 500, message: "entryFailed" },
   tooManyRequests: { code: 429, message: "tooManyRequests" },
+  pixKeyMissing: { code: 403, message: "pixKeyMissing" },
 } as const;
 export type JoinRefusal = keyof typeof JOIN_REFUSALS;
 

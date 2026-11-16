@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Share, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MIN_PLAYERS } from "@pontinho/protocol";
+import { formatReais } from "@/shared/format/numbers";
 import { friendsLink } from "@/shared/navigation/friendsLink";
 import { Avatar } from "@/shared/ui/Avatar";
 import { Button } from "@/shared/ui/Button";
@@ -59,6 +60,7 @@ export function WaitingRoom({ state, onExit }: Props) {
               {match.friendsCode.replace("{code}", code)}
             </Text>
             <Button title={linkCopied ? match.linkCopied : match.shareLink} onPress={shareLink} variant="secondary" />
+            {state.centsPerPoint > 0 && <Text style={styles.pix}>{match.pixPerPoint.replace("{value}", formatReais(state.centsPerPoint))}</Text>}
           </View>
         )}
         <View style={styles.status}>
@@ -108,6 +110,7 @@ const styles = StyleSheet.create({
   countdown: { width: 220 },
   invite: { alignSelf: "stretch", alignItems: "center", gap: 12 },
   code: { color: colors.text, fontSize: 22, fontFamily: fonts.display, letterSpacing: 2 },
+  pix: { color: colors.feltText, fontSize: 14, fontFamily: fonts.semibold, textAlign: "center" },
   footer: { gap: 10 },
   waitingOwner: { color: colors.textSoft, fontSize: 14, fontFamily: fonts.semibold, textAlign: "center" },
   seats: { alignSelf: "stretch", flexDirection: "row", flexWrap: "wrap", gap: 10 },

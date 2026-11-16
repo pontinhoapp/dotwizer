@@ -142,6 +142,7 @@ export class ProfileService {
       bankAccount: user.bankAccount,
       photoUrl: user.photoPath ? this.avatarStorage.publicUrl({ path: user.photoPath }) : null,
       pixKeyRegistered: user.pixKeyRegisteredAt !== null,
+      pixSettlement: user.pixSettlement,
       complete: Boolean(user.fullName && user.cpf && user.birthDate && user.nickname),
     };
   }

@@ -76,6 +76,7 @@ export const profileResponseSchema = z.object({
   photoUrl: z.string().nullable().describe("URL pública da foto, ou nulo quando a conta não tem foto."),
   bankAccount: bankAccountSchema.nullable().describe("Conta bancária para receber, ou nulo quando a conta não cadastrou."),
   pixKeyRegistered: z.boolean().describe("Verdadeiro depois que a conta cadastrou a chave Pix do CPF para receber."),
+  pixSettlement: z.boolean().describe("Verdadeiro quando a conta pode criar salas com amigos com acerto por Pix."),
   complete: z.boolean().describe("Verdadeiro quando a conta tem nome completo, CPF, data de nascimento e apelido."),
 });
 export type ProfileResponse = z.infer<typeof profileResponseSchema>;

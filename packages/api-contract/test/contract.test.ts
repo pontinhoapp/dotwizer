@@ -170,6 +170,8 @@ describe("api-contract", () => {
       balance: 100,
       minimumBalance: null,
       canJoin: null,
+      pixSettlement: false,
+      pixKeyRegistered: false,
     };
 
     assert.strictEqual(playerEntryResponseSchema.safeParse({ ...entry, openMatchId: randomUUID() }).success, true);

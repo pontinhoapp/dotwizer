@@ -3,11 +3,11 @@ import { CHIP_TABLES, settleRound, type MatchFinance } from "@pontinho/rules";
 import { API_ERROR_STATUS } from "@pontinho/api-contract";
 import { GameApiError, type EliminatePlayerInput, type FinishMatchInput, type GameApi, type GameApiErrorCode, type RecordFriendsMatchInput, type RegisterRoundInput } from "../../src/gameApi/GameApi.js";
 
-type Account = { token: string; userId: string; name: string | null; photoUrl: string | null; profileComplete: boolean; balance: number; openMatchId: string | null };
+type Account = { token: string; userId: string; name: string | null; photoUrl: string | null; profileComplete: boolean; balance: number; openMatchId: string | null; pixSettlement: boolean; pixKeyRegistered: boolean };
 
 type FakeMatch = { id: string; table: number; pointValue: number; finances: MatchFinance[]; lastRound: number };
 
-type AccountOptions = { balance?: number; profileComplete?: boolean; photoUrl?: string | null; openMatchId?: string };
+type AccountOptions = { balance?: number; profileComplete?: boolean; photoUrl?: string | null; openMatchId?: string; pixSettlement?: boolean; pixKeyRegistered?: boolean };
 
 export function statusOf(code: GameApiErrorCode) {
   if (code === "networkError" || code === "timeout") {
@@ -56,6 +56,8 @@ export class FakeGameApi implements GameApi {
       profileComplete: options.profileComplete ?? true,
       balance: options.balance ?? 100_000,
       openMatchId: options.openMatchId ?? null,
+      pixSettlement: options.pixSettlement ?? false,
+      pixKeyRegistered: options.pixKeyRegistered ?? false,
     };
     this.accounts.set(account.token, account);
     return account.token;
@@ -110,6 +112,8 @@ export class FakeGameApi implements GameApi {
       minimumBalance: chipTable?.minimumBalance ?? null,
       canJoin: chipTable ? account.balance >= chipTable.minimumBalance : null,
       openMatchId: account.openMatchId,
+      pixSettlement: account.pixSettlement,
+      pixKeyRegistered: account.pixKeyRegistered,
     };
   }
 
@@ -196,7 +200,12 @@ export class FakeGameApi implements GameApi {
   async recordFriendsMatch(input: RecordFriendsMatchInput): Promise<RecordFriendsMatchResponse> {
     this.friendsMatches.push(input);
     this.consumeFailure("recordFriendsMatch");
-    return { matchId: input.matchId };
+    if (input.centsPerPoint === null) {
+      return { matchId: input.matchId, pixTransfers: [] };
+    }
+    const [winner, ...losers] = input.players.toSorted((a, b) => b.result - a.result);
+    const pixTransfers = losers.map(({ userId, result }) => ({ fromUserId: userId, toUserId: winner.userId, amountCents: -result, pixCopyPaste: `pix-${userId}`, qrCode: `qr-${userId}` }));
+    return { matchId: input.matchId, pixTransfers };
   }
 
   setOpenMatch(name: string, openMatchId: string | null) {

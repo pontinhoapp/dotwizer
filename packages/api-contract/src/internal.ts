@@ -24,6 +24,8 @@ export const playerEntryResponseSchema = z.object({
   minimumBalance: chipsSchema.nullable().describe("Saldo mínimo da mesa. Nulo quando não foi pedida mesa."),
   canJoin: z.boolean().nullable().describe("Saldo suficiente para a mesa. Nulo quando não foi pedida mesa."),
   openMatchId: matchIdSchema.nullable().describe("Partida não encerrada em que a conta está, ou nulo. A API não recusa por isso."),
+  pixSettlement: z.boolean().describe("Verdadeiro quando a conta pode jogar salas com amigos com acerto por Pix."),
+  pixKeyRegistered: z.boolean().describe("Verdadeiro depois que a conta cadastrou a chave Pix do CPF para receber."),
 });
 export type PlayerEntryResponse = z.infer<typeof playerEntryResponseSchema>;
 
@@ -109,6 +111,7 @@ export const recordFriendsMatchBodySchema = z
   .strictObject({
     table: tableSchema.describe("Mesa escolhida por quem criou a sala: define o valor do ponto e as fichas do começo."),
     winnerId: userIdSchema.nullable().describe("Vencedor, ou nulo quando ninguém venceu."),
+    centsPerPoint: z.number().int().positive().nullable().describe("Centavos por ponto do acerto por Pix, ou nulo na sala sem Pix."),
     players: z
       .array(z.strictObject({ userId: userIdSchema, result: chipsSchema.describe("Fichas da partida ganhas (positivo) ou perdidas (negativo).") }))
       .min(MIN_PLAYERS)
@@ -124,7 +127,17 @@ export const recordFriendsMatchBodySchema = z
   );
 export type RecordFriendsMatchBody = z.infer<typeof recordFriendsMatchBodySchema>;
 
+export const pixTransferSchema = z.object({
+  fromUserId: userIdSchema.describe("Quem paga."),
+  toUserId: userIdSchema.describe("Quem recebe."),
+  amountCents: z.number().int().positive().describe("Valor em centavos."),
+  pixCopyPaste: z.string().describe("Pix Copia e Cola estático, com a chave CPF e o nome de quem recebe."),
+  qrCode: z.string().describe("QR Code do Pix Copia e Cola, como data URL de imagem PNG."),
+});
+export type PixTransfer = z.infer<typeof pixTransferSchema>;
+
 export const recordFriendsMatchResponseSchema = z.object({
   matchId: matchIdSchema,
+  pixTransfers: z.array(pixTransferSchema).describe("Pagamentos do acerto por Pix, com o menor número de transferências. Vazio na sala sem Pix."),
 });
 export type RecordFriendsMatchResponse = z.infer<typeof recordFriendsMatchResponseSchema>;

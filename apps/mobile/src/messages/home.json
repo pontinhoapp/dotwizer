@@ -13,7 +13,8 @@
     "insufficientBalance": "Você não tem o saldo mínimo desta mesa.",
     "apiUnavailable": "Não foi possível conferir as suas fichas. Tente de novo.",
     "invalidOptions": "Não foi possível entrar com essas opções.",
-    "accountDisabled": "Sua conta está desativada."
+    "accountDisabled": "Sua conta está desativada.",
+    "pixKeyMissing": "Cadastre sua chave Pix em Pagamento para entrar nesta sala."
   },
   "playOnline": "Jogar online",
   "playOnlineHint": "Use suas habilidades online com outros jogadores e ganhe recompensas",

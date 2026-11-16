@@ -5,7 +5,7 @@ import { NO_WINNER } from "./ChipsMatch.js";
 import { CLIENT_IP_HEADER, entryLimit } from "./entryLimit.js";
 import { openMatches } from "./openMatches.js";
 
-export type PlayerAuth = { id: string; name: string; photoUrl: string; table: number };
+export type PlayerAuth = { id: string; name: string; photoUrl: string; table: number; pixSettlement: boolean; pixKeyRegistered: boolean };
 
 export function refuse(refusal: JoinRefusal) {
   const { code, message } = JOIN_REFUSALS[refusal];
@@ -90,6 +90,6 @@ export function createPlayerAuthenticator(gameApi: GameApi) {
     if (entry.canJoin === false) {
       throw refuse("insufficientBalance");
     }
-    return { id: entry.userId, name: entry.nickname, photoUrl: entry.photoUrl ?? "", table: chipsTable ?? PRACTICE_TABLE };
+    return { id: entry.userId, name: entry.nickname, photoUrl: entry.photoUrl ?? "", table: chipsTable ?? PRACTICE_TABLE, pixSettlement: entry.pixSettlement, pixKeyRegistered: entry.pixKeyRegistered };
   };
 }

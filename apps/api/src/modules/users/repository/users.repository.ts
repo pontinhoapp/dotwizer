@@ -15,6 +15,7 @@ const userSelect = {
   bankAccount: true,
   photoPath: true,
   pixKeyRegisteredAt: true,
+  pixSettlement: true,
   active: true,
 } satisfies Prisma.UserSelect;
 
@@ -32,6 +33,7 @@ export interface UserRecord {
   bankAccount: BankAccount | null;
   photoPath: string | null;
   pixKeyRegisteredAt: Date | null;
+  pixSettlement: boolean;
   active: boolean;
 }
 

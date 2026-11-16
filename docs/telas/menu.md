@@ -25,7 +25,8 @@ Código: `apps/mobile/src/app/index.tsx`, com `useWallet`, `useDailyBonus`, `Chi
 | Estatísticas, logo abaixo de Pagamento | Tela vazia, só com o título (`/stats`) |
 | Foto, no topo | [perfil](perfil.md) (`/profile`), onde ficam o Sair e Configurações |
 | Configurações, dentro do Perfil | Aparência e Notificações (`/settings`) |
-| Manual DotWizer e Ajuda | Telas vazias, só com o título (`/manual` e `/help`) |
+| Manual DotWizer | Tela vazia, só com o título (`/manual`) |
+| Ajuda | Suporte por e-mail (`/help`): o endereço pontinho.app@gmail.com, "Enviar e-mail", que abre o app de e-mail, e "Copiar e-mail" |
 
 Com uma sala aberta (`room` do `MatchProvider`), o menu manda direto para a mesa.
 
@@ -53,6 +54,7 @@ Os erros que valem para toda rota estão em [erros comuns](erros-comuns.md).
 - Ao abrir o app, enquanto os dados carregam, aparece a abertura em `apps/mobile/src/shared/ui/AppSplash.tsx`: fundo verde, letras do DotWizer se juntando a 90 ms por letra, o pingo vermelho caindo no "i" e, em seguida, dama de copas, rei de espadas e valete de ouros do modelo Jumbo lançados de baixo para cima em leque atrás do logo, um a cada 500 ms, num movimento único e suave, como se alguém desse as cartas. Ela dura cerca de 3,2 s, fica até os dados chegarem, mostra "Carregando seus dados…" depois da última carta se os dados ainda não chegaram e, com movimento reduzido, mostra o logo parado. (Cliente e Lucas, 09/11/2026)
 - Todo botão do menu tem legenda; o saldo fica menor que a foto, para destacar quem está logado; a foto abre o Perfil, que ganha Configurações e Estatísticas; abaixo do logo fica "Pontinho", sem parênteses. (Lucas, 12/11/2026, ao testar a rodada)
 - Estatísticas sai do Perfil e fica no menu, logo abaixo de Pagamento. São as estatísticas do próprio jogador, não ranking; a tela fica vazia até a cliente definir o cálculo. (Cliente, 13/11/2026; Lucas, 13/11/2026)
+- Ajuda é a área de suporte. Por ora, só com o e-mail pontinho.app@gmail.com. (Cliente, 13/11/2026; Lucas, 14/11/2026)
 - Títulos só com a inicial maiúscula; "(Pontinho)" e o saldo sem "Fichas" valem só no menu; os botões novos abrem telas vazias até a cliente definir o conteúdo. (Lucas, 08/11/2026)
 
 ## Testes
